@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Referral Leaderboard</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" />
+<style>
+  body { background-color: #0b1020; color: white; font-family: 'Inter', sans-serif; }
+  .card { background: #1f2937; border-radius: 1rem; padding: 1rem 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
+  .rank-circle { width: 40px; height: 40px; border-radius: 50%; display:flex; align-items:center; justify-content:center; font-weight:bold; color:white; }
+  .first { background: gold; color: #111827; }
+  .second { background: silver; color: #111827; }
+  .third { background: #cd7f32; color: #111827; }
+  .rank-item { display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.1); }
+  .rank-item:last-child { border-bottom:none; }
+  .user-info { display:flex; align-items:center; gap:12px; }
+  .user-avatar { width:40px; height:40px; border-radius:50%; object-fit:cover; }
+  .nav-back { cursor:pointer; }
+
+  .header-controls { display:flex; align-items:center; padding:0 16px; margin:12px 0; }
+  .period-select-wrapper { position:relative; }
+  .period-select-wrapper i { position:absolute; left:10px; top:50%; transform:translateY(-50%); color:#cbd5e1; pointer-events:none; }
+  .period-select { padding:8px 12px 8px 32px; border-radius:12px; background: rgba(255,255,255,0.05); color:#cbd5e1; font-weight:600; border:none; appearance:none; cursor:pointer; }
+  .refer-btn { padding:8px 20px; border-radius:12px; background: linear-gradient(90deg,#3f3ef2,#06b6d4); color:white; font-weight:600; cursor:pointer; transition:all 0.3s; box-shadow:0 4px 10px rgba(0,0,0,0.4); display:flex; align-items:center; gap:8px; margin-left:16px; }
+  .refer-btn:hover { opacity:0.9; }
+
+  main { scrollbar-width: thin; scrollbar-color: #374151 transparent; }
+  main::-webkit-scrollbar { width: 8px; }
+  main::-webkit-scrollbar-track { background: transparent; }
+  main::-webkit-scrollbar-thumb { background-color: #374151; border-radius: 4px; }
+</style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+<!-- HEADER -->
+<header class="flex items-center justify-between px-4 py-3 bg-gray-900 shadow relative">
+  <button onclick="goBack()" class="text-gray-300 hover:text-white nav-back">
+    <i class="fa-solid fa-arrow-left text-xl"></i>
+  </button>
+  <div class="flex items-center gap-2">
+    <img src="https://i.ibb.co/Y7SksQy9/IMG-20250830-082315-071.jpg" class="w-8 h-8 rounded-full border border-gray-600" alt="App Logo">
+    <h1 class="text-lg font-bold">Referral Leaderboard</h1>
+  </div>
+  <!-- Top-right icon redirects back to main leaderboard -->
+  <a href="leaderboard.html" class="text-cyan-400 hover:text-blue-400">
+    <i class="fa-solid fa-arrows-rotate text-xl"></i>
+  </a>
+</header>
+
+<!-- FILTER & REFER BUTTON -->
+<div class="header-controls">
+  <div class="period-select-wrapper">
+    <i class="fa-solid fa-filter"></i>
+    <select class="period-select" id="periodSelect">
+      <option value="monthly">Monthly</option>
+      <option value="all">All-Time</option>
+    </select>
+  </div>
+  <div class="flex-grow"></div>
+  <button class="refer-btn" onclick="location.href='referral.html'">
+    <i class="fa-solid fa-gift"></i> Refer Now
+  </button>
+</div>
+
+<main class="flex-1 overflow-y-auto p-4 space-y-4" id="leaderboard-container"></main>
+
+<script>
+function goBack() {
+  if (document.referrer && document.referrer !== window.location.href) {
+    window.history.back();
+  } else {
+    window.location.href = 'referral.html';
+  }
+}
+
+const periodSelect = document.getElementById('periodSelect');
+const container = document.getElementById('leaderboard-container');
+
+// Demo data: top 10 per period
+const leaderboardData = {
+  monthly: [
+    { name:'Neha Kaur', earned:120, referrals:25 }, { name:'Aman Negi', earned:110, referrals:24 },
+    { name:'Priya Singh', earned:100, referrals:22 }, { name:'Rohit Sharma', earned:95, referrals:21 },
+    { name:'Karan Verma', earned:90, referrals:20 }, { name:'Simran Jain', earned:85, referrals:18 },
+    { name:'Vikram Patel', earned:80, referrals:17 }, { name:'Sana Khan', earned:75, referrals:16 },
+    { name:'Anjali Mehra', earned:70, referrals:15 }, { name:'Rahul Yadav', earned:65, referrals:14 }
+  ],
+  all: [
+    { name:'Aman Negi', earned:500, referrals:100 }, { name:'Neha Kaur', earned:480, referrals:98 },
+    { name:'Rohit Sharma', earned:470, referrals:95 }, { name:'Priya Singh', earned:450, referrals:90 },
+    { name:'Karan Verma', earned:430, referrals:88 }, { name:'Simran Jain', earned:420, referrals:85 },
+    { name:'Vikram Patel', earned:400, referrals:80 }, { name:'Anjali Mehra', earned:390, referrals:78 },
+    { name:'Rahul Yadav', earned:380, referrals:75 }, { name:'Sana Khan', earned:360, referrals:72 }
+  ]
+};
+
+function renderLeaderboard(period) {
+  const data = leaderboardData[period];
+  container.innerHTML = '';
+
+  // Top 3 card
+  const top3Card = document.createElement('div');
+  top3Card.className = 'card';
+  top3Card.innerHTML = `<h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+    <i class="fa-solid fa-trophy text-yellow-400"></i> Top Referrers
+  </h2>`;
+  data.slice(0,3).forEach((user,i)=>{
+    const rankColors = ['first','second','third'];
+    top3Card.innerHTML += `
+      <div class="rank-item">
+        <div class="user-info">
+          <div class="rank-circle ${rankColors[i]}">${i+1}</div>
+          <img src="https://i.ibb.co/Y7SksQy9/IMG-20250830-082315-071.jpg" class="user-avatar" alt="User">
+          <div>
+            <p class="font-semibold">${user.name}</p>
+            <p class="text-gray-400 text-sm">₹${user.earned} earned</p>
+          </div>
+        </div>
+        <span class="text-gray-300 font-bold">${user.referrals} referrals</span>
+      </div>`;
+  });
+  container.appendChild(top3Card);
+
+  // Other ranks
+  const othersCard = document.createElement('div');
+  othersCard.className = 'card';
+  othersCard.innerHTML = `<h2 class="text-lg font-bold mb-3 flex items-center gap-2">
+    <i class="fa-solid fa-list-ol text-indigo-400"></i> Other Referrers
+  </h2>`;
+  data.slice(3,10).forEach((user,i)=>{
+    const rank = i+4;
+    othersCard.innerHTML += `
+      <div class="rank-item">
+        <div class="user-info">
+          <div class="rank-circle" style="background:#4b5563;">${rank}</div>
+          <img src="https://i.ibb.co/Y7SksQy9/IMG-20250830-082315-071.jpg" class="user-avatar" alt="User">
+          <div>
+            <p class="font-semibold">${user.name}</p>
+            <p class="text-gray-400 text-sm">₹${user.earned} earned</p>
+          </div>
+        </div>
+        <span class="text-gray-400 font-bold">${user.referrals} referrals</span>
+      </div>`;
+  });
+  container.appendChild(othersCard);
+}
+
+// Initial render
+renderLeaderboard('monthly');
+
+periodSelect.addEventListener('change', () => {
+  renderLeaderboard(periodSelect.value);
+});
+</script>
+
+</body>
+</html>

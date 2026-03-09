@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact Us - ElitePros</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+  
+  <style>
+    :root {
+      --bg-dark: #0b1020;
+      --card-bg: #1f2340;
+      --card-dark: #121322;
+      --accent: #3f3ef2;
+      --muted: #9aa3b2;
+    }
+    
+    body {
+      background: var(--bg-dark);
+      color: white;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      margin: 0;
+      padding: 0;
+      padding-bottom: 20px;
+    }
+    
+    /* Header - Centered Icon + Label (Inline) */
+    .header-bar {
+      background: var(--card-dark);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      position: relative;
+    }
+
+    .centered-logo-inline-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .app-logo-header {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 2px solid rgba(99, 102, 241, 0.5);
+      flex-shrink: 0;
+    }
+
+    .centered-logo-inline-label {
+      font-weight: 800;
+      font-size: 18px;
+      background: linear-gradient(135deg, #fff, #a5b4fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      white-space: nowrap;
+    }
+
+    .back-btn {
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      color: white;
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      flex-shrink: 0;
+    }
+
+    .back-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+    
+    /* Contact Cards */
+    .contact-section {
+      padding: 0 16px;
+    }
+    
+    .contact-card {
+      background: linear-gradient(135deg, #1f2340, #121322);
+      border-radius: 20px;
+      padding: 24px;
+      margin-bottom: 20px;
+      border: 2px solid transparent;
+      box-shadow: 0 12px 35px rgba(2,6,23,0.8);
+      
+      background: linear-gradient(135deg, #1f2340, #121322) padding-box,
+                  linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05)) border-box;
+    }
+    
+    .contact-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    
+    .contact-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      color: white;
+    }
+    
+    .contact-icon.support {
+      background: linear-gradient(135deg, #10b981, #059669);
+    }
+    
+    .contact-icon.timings {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+    }
+    
+    .contact-icon.social {
+      background: linear-gradient(135deg, #ec4899, #db2777);
+    }
+    
+    .contact-title {
+      font-weight: 800;
+      font-size: 20px;
+      background: linear-gradient(135deg, #fff, #a5b4fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .contact-description {
+      text-align: center;
+      color: #9ca3af;
+      font-size: 14px;
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+    
+    /* Contact Methods Grid */
+    .contact-methods-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    
+    @media (max-width: 480px) {
+      .contact-methods-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .contact-method-card {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      padding: 16px;
+      border: 1px solid rgba(255,255,255,0.1);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      text-align: center;
+    }
+    
+    .contact-method-card:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: translateY(-3px);
+      border-color: var(--accent);
+    }
+    
+    .method-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 12px;
+      font-size: 1.2rem;
+      color: white;
+    }
+    
+    .method-icon.telegram {
+      background: linear-gradient(135deg, #0088cc, #006699);
+    }
+    
+    .method-icon.whatsapp {
+      background: linear-gradient(135deg, #25d366, #128c7e);
+    }
+    
+    .method-icon.phone {
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+    }
+    
+    .method-icon.email {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+    }
+    
+    .method-icon.instagram {
+      background: linear-gradient(135deg, #e4405f, #c13584);
+    }
+    
+    .method-label {
+      font-weight: 700;
+      font-size: 14px;
+      color: #e5e7eb;
+      margin-bottom: 4px;
+    }
+    
+    .method-value {
+      font-size: 12px;
+      color: #9ca3af;
+      word-break: break-word;
+    }
+    
+    /* Timings Display */
+    .timings-display {
+      text-align: center;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .timings-text {
+      font-size: 15px;
+      color: #e5e7eb;
+      margin-bottom: 8px;
+    }
+    
+    .timings-hours {
+      font-weight: 800;
+      font-size: 22px;
+      background: linear-gradient(135deg, #fbbf24, #f59e0b);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    /* Social Icons */
+    .social-icons-container {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-top: 20px;
+    }
+    
+    .social-icon-link {
+      width: 60px;
+      height: 60px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      font-size: 1.8rem;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    }
+    
+    .social-icon-link:hover {
+      transform: translateY(-5px) scale(1.1);
+    }
+    
+    .social-icon-link.instagram {
+      background: linear-gradient(135deg, #e4405f, #c13584);
+      color: white;
+    }
+    
+    .social-icon-link.youtube {
+      background: linear-gradient(135deg, #ff0000, #cc0000);
+      color: white;
+    }
+    
+    .social-icon-link.telegram {
+      background: linear-gradient(135deg, #0088cc, #006699);
+      color: white;
+    }
+    
+    .social-icon-link.whatsapp {
+      background: linear-gradient(135deg, #25d366, #128c7e);
+      color: white;
+    }
+    
+    .social-icon-link.facebook {
+      background: linear-gradient(135deg, #1877f2, #0d65c2);
+      color: white;
+    }
+    
+    .social-icon-link.twitter {
+      background: linear-gradient(135deg, #1da1f2, #0d8bd9);
+      color: white;
+    }
+    
+    .social-icon-link.discord {
+      background: linear-gradient(135deg, #5865f2, #4752c4);
+      color: white;
+    }
+    
+    /* Footer Text */
+    .footer-text {
+      text-align: center;
+      color: #6b7280;
+      font-size: 13px;
+      margin-top: 30px;
+      padding: 0 16px;
+    }
+    
+    .highlight {
+      color: #10b981;
+      font-weight: 600;
+    }
+    
+    /* Loading States */
+    .loading-container {
+      padding: 40px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #9ca3af;
+    }
+    
+    .loading-container i {
+      font-size: 2rem;
+      margin-bottom: 16px;
+    }
+    
+    .skeleton-shimmer {
+      background: linear-gradient(90deg, 
+          rgba(255, 255, 255, 0.05) 25%, 
+          rgba(255, 255, 255, 0.1) 50%, 
+          rgba(255, 255, 255, 0.05) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 12px;
+    }
+    
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+    
+    .skeleton-card {
+      height: 200px;
+      margin-bottom: 20px;
+    }
+    
+    .skeleton-method {
+      height: 120px;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Header - Centered Icon + Label (Inline) -->
+  <div class="header-bar">
+    <button class="back-btn" onclick="goBack()">
+      <i class="fa-solid fa-arrow-left"></i>
+    </button>
+    
+    <!-- Centered Logo + Label Container (Inline) -->
+    <div class="centered-logo-inline-container">
+      <div class="app-logo-header">
+        <img id="appLogo" src="http://elitepros.wuaze.com/IMG-20260106-WA0000.jpg" alt="ElitePros" style="width:100%;height:100%;object-fit:cover;">
+      </div>
+      <div class="centered-logo-inline-label">Contact Us</div>
+    </div>
+    
+    <!-- Empty div for spacing -->
+    <div style="width:44px;"></div>
+  </div>
+
+  <!-- Loading State -->
+  <div id="loadingContainer" class="contact-section">
+    <div class="contact-card skeleton-shimmer skeleton-card"></div>
+    <div class="contact-card skeleton-shimmer skeleton-card"></div>
+    <div class="contact-card skeleton-shimmer skeleton-card"></div>
+  </div>
+
+  <!-- Contact Content -->
+  <div id="contactContent" class="contact-section" style="display: none;">
+    
+    <!-- Support Card -->
+    <div class="contact-card">
+      <div class="contact-card-header">
+        <div class="contact-icon support">
+          <i class="fa-solid fa-headset"></i>
+        </div>
+        <div class="contact-title">Need Help?</div>
+      </div>
+      
+      <div class="contact-description">
+        Get in touch with our support team through any of the following methods. 
+        We're here to help you with tournaments, account issues, and general queries.
+      </div>
+      
+      <div class="contact-methods-grid" id="contactMethodsGrid">
+        <!-- Contact methods will be loaded dynamically -->
+      </div>
+    </div>
+    
+    <!-- Timings Card -->
+    <div class="contact-card">
+      <div class="contact-card-header">
+        <div class="contact-icon timings">
+          <i class="fa-solid fa-clock"></i>
+        </div>
+        <div class="contact-title">Support Timings</div>
+      </div>
+      
+      <div class="contact-description">
+        Our dedicated support team is available during these hours
+      </div>
+      
+      <div class="timings-display" id="timingsDisplay">
+        <!-- Timings will be loaded dynamically -->
+      </div>
+    </div>
+    
+    <!-- Social Media Card -->
+    <div class="contact-card">
+      <div class="contact-card-header">
+        <div class="contact-icon social">
+          <i class="fa-solid fa-hashtag"></i>
+        </div>
+        <div class="contact-title">Follow Us</div>
+      </div>
+      
+      <div class="contact-description">
+        Stay updated with tournament announcements, winners, and exclusive offers
+      </div>
+      
+      <div class="social-icons-container" id="socialIconsContainer">
+        <!-- Social icons will be loaded dynamically -->
+      </div>
+    </div>
+    
+    <div class="footer-text" id="footerText">
+      <!-- Footer text will be loaded dynamically -->
+    </div>
+  </div>
+
+  <script>
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyC86fii3isDnSOof71h_18PdZehzCEFIFw",
+      authDomain: "eliteprosofficial.firebaseapp.com",
+      databaseURL: "https://eliteprosofficial-default-rtdb.firebaseio.com",
+      projectId: "eliteprosofficial",
+      storageBucket: "eliteprosofficial.firebasestorage.app",
+      messagingSenderId: "646561207100",
+      appId: "1:646561207100:web:47de7b648695367e208439",
+      measurementId: "G-ZN5VNFCSEL"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    // DOM Elements
+    const loadingContainer = document.getElementById('loadingContainer');
+    const contactContent = document.getElementById('contactContent');
+    const contactMethodsGrid = document.getElementById('contactMethodsGrid');
+    const timingsDisplay = document.getElementById('timingsDisplay');
+    const socialIconsContainer = document.getElementById('socialIconsContainer');
+    const footerText = document.getElementById('footerText');
+
+    // Go back function
+    function goBack() {
+      if (window.history.length > 1) {
+        window.history.back();
+      } else {
+        window.location.href = 'home.html';
+      }
+    }
+
+    // Get icon class for platform
+    function getPlatformIconClass(platform) {
+      const platformLower = (platform || '').toLowerCase();
+      
+      if (platformLower.includes('telegram')) return 'fa-brands fa-telegram';
+      if (platformLower.includes('whatsapp')) return 'fa-brands fa-whatsapp';
+      if (platformLower.includes('phone') || platformLower.includes('call')) return 'fa-solid fa-phone';
+      if (platformLower.includes('email') || platformLower.includes('mail')) return 'fa-solid fa-envelope';
+      if (platformLower.includes('instagram')) return 'fa-brands fa-instagram';
+      if (platformLower.includes('youtube')) return 'fa-brands fa-youtube';
+      if (platformLower.includes('facebook')) return 'fa-brands fa-facebook';
+      if (platformLower.includes('twitter') || platformLower.includes('x')) return 'fa-brands fa-twitter';
+      if (platformLower.includes('discord')) return 'fa-brands fa-discord';
+      
+      return 'fa-solid fa-question-circle';
+    }
+
+    // Get icon color class for platform
+    function getPlatformIconColor(platform) {
+      const platformLower = (platform || '').toLowerCase();
+      
+      if (platformLower.includes('telegram')) return 'telegram';
+      if (platformLower.includes('whatsapp')) return 'whatsapp';
+      if (platformLower.includes('phone') || platformLower.includes('call')) return 'phone';
+      if (platformLower.includes('email') || platformLower.includes('mail')) return 'email';
+      if (platformLower.includes('instagram')) return 'instagram';
+      if (platformLower.includes('youtube')) return 'youtube';
+      if (platformLower.includes('facebook')) return 'facebook';
+      if (platformLower.includes('twitter') || platformLower.includes('x')) return 'twitter';
+      if (platformLower.includes('discord')) return 'discord';
+      
+      return 'telegram';
+    }
+
+    // Get social platform color class
+    function getSocialPlatformClass(platform) {
+      const platformLower = (platform || '').toLowerCase();
+      
+      if (platformLower.includes('instagram')) return 'instagram';
+      if (platformLower.includes('youtube')) return 'youtube';
+      if (platformLower.includes('telegram')) return 'telegram';
+      if (platformLower.includes('whatsapp')) return 'whatsapp';
+      if (platformLower.includes('facebook')) return 'facebook';
+      if (platformLower.includes('twitter') || platformLower.includes('x')) return 'twitter';
+      if (platformLower.includes('discord')) return 'discord';
+      
+      return 'instagram';
+    }
+
+    // Format contact value for display
+    function formatContactValue(type, value) {
+      if (!value) return 'Not set';
+      
+      const typeLower = (type || '').toLowerCase();
+      
+      if (typeLower.includes('phone')) {
+        return value.replace(/(\d{3})(\d{3})(\d{4})/, '$1 $2 $3');
+      }
+      
+      if (typeLower.includes('email')) {
+        return value;
+      }
+      
+      if (typeLower.includes('telegram') || typeLower.includes('whatsapp')) {
+        // Extract username from URL
+        const match = value.match(/t\.me\/(.+)/) || value.match(/wa\.me\/(.+)/);
+        if (match) return '@' + match[1];
+        return value;
+      }
+      
+      return value;
+    }
+
+    // Handle contact method click
+    function handleContactClick(type, value) {
+      const typeLower = (type || '').toLowerCase();
+      
+      if (typeLower.includes('phone')) {
+        window.location.href = `tel:${value}`;
+      } else if (typeLower.includes('email')) {
+        window.location.href = `mailto:${value}`;
+      } else if (typeLower.includes('telegram')) {
+        const telegramUrl = value.startsWith('http') ? value : `https://t.me/${value.replace('@', '')}`;
+        window.open(telegramUrl, '_blank');
+      } else if (typeLower.includes('whatsapp')) {
+        const whatsappUrl = value.startsWith('http') ? value : `https://wa.me/${value.replace('+', '').replace(/\D/g, '')}`;
+        window.open(whatsappUrl, '_blank');
+      } else if (typeLower.includes('instagram')) {
+        const instagramUrl = value.startsWith('http') ? value : `https://instagram.com/${value.replace('@', '')}`;
+        window.open(instagramUrl, '_blank');
+      } else {
+        // Open any URL
+        if (value.startsWith('http')) {
+          window.open(value, '_blank');
+        }
+      }
+    }
+
+    // Load contact data from Firebase
+    function loadContactData() {
+      const contactRef = database.ref('contactSettings');
+      
+      contactRef.on('value', (snapshot) => {
+        const contactData = snapshot.val();
+        
+        // Hide loading, show content
+        loadingContainer.style.display = 'none';
+        contactContent.style.display = 'block';
+        
+        if (contactData) {
+          // Load contact methods
+          renderContactMethods(contactData.contactMethods || []);
+          
+          // Load support timings
+          renderSupportTimings(contactData.supportTimings || {});
+          
+          // Load social platforms
+          renderSocialPlatforms(contactData.socialPlatforms || []);
+          
+          // Load footer text
+          renderFooterText(contactData.footerText || {});
+        } else {
+          // Show default content if no data
+          showDefaultContent();
+        }
+      }, (error) => {
+        console.error("Error loading contact data:", error);
+        loadingContainer.style.display = 'none';
+        contactContent.style.display = 'block';
+        showDefaultContent();
+      });
+    }
+
+    // Render contact methods
+    function renderContactMethods(methods) {
+      if (!methods || methods.length === 0) {
+        contactMethodsGrid.innerHTML = `
+          <div style="grid-column: 1 / -1; text-align: center; padding: 20px; color: #9ca3af;">
+            <i class="fa-solid fa-headset" style="font-size: 2rem; margin-bottom: 12px; opacity: 0.5;"></i>
+            <div>No contact methods available</div>
+            <div style="font-size: 12px; margin-top: 8px;">Please check back later</div>
+          </div>
+        `;
+        return;
+      }
+      
+      let html = '';
+      
+      methods.forEach(method => {
+        if (!method.enabled) return;
+        
+        const iconClass = getPlatformIconClass(method.type);
+        const iconColor = getPlatformIconColor(method.type);
+        const displayValue = formatContactValue(method.type, method.value);
+        
+        html += `
+          <div class="contact-method-card" onclick="handleContactClick('${method.type}', '${method.value}')">
+            <div class="method-icon ${iconColor}">
+              <i class="${iconClass}"></i>
+            </div>
+            <div class="method-label">${method.label || method.type}</div>
+            <div class="method-value">${displayValue}</div>
+          </div>
+        `;
+      });
+      
+      contactMethodsGrid.innerHTML = html;
+    }
+
+    // Render support timings
+    function renderSupportTimings(timings) {
+      if (!timings.startTime || !timings.endTime) {
+        timingsDisplay.innerHTML = `
+          <div class="timings-text">Available Daily</div>
+          <div class="timings-hours">4:00 PM - 10:00 PM</div>
+          <div style="font-size: 12px; color: #9ca3af; margin-top: 8px;">Default timings</div>
+        `;
+        return;
+      }
+      
+      timingsDisplay.innerHTML = `
+        <div class="timings-text">${timings.label || 'Available Daily'}</div>
+        <div class="timings-hours">${timings.startTime} - ${timings.endTime}</div>
+        ${timings.description ? `<div style="font-size: 12px; color: #9ca3af; margin-top: 8px;">${timings.description}</div>` : ''}
+      `;
+    }
+
+    // Render social platforms
+    function renderSocialPlatforms(platforms) {
+      if (!platforms || platforms.length === 0) {
+        socialIconsContainer.innerHTML = `
+          <div style="text-align: center; width: 100%; color: #9ca3af; padding: 20px;">
+            <i class="fa-solid fa-hashtag" style="font-size: 2rem; margin-bottom: 12px; opacity: 0.5;"></i>
+            <div>Follow us on our social media</div>
+          </div>
+        `;
+        return;
+      }
+      
+      let html = '';
+      
+      platforms.forEach(platform => {
+        if (!platform.enabled) return;
+        
+        const platformClass = getSocialPlatformClass(platform.platform);
+        const iconClass = getPlatformIconClass(platform.platform);
+        
+        html += `
+          <a href="${platform.url}" target="_blank" class="social-icon-link ${platformClass}">
+            <i class="${iconClass}"></i>
+          </a>
+        `;
+      });
+      
+      socialIconsContainer.innerHTML = html;
+    }
+
+    // Render footer text
+    function renderFooterText(footerData) {
+      if (!footerData) {
+        footerText.innerHTML = `
+          Average response time: <span class="highlight">within 24 hours</span> • 
+          For urgent queries, use Telegram support
+        `;
+        return;
+      }
+      
+      let html = '';
+      
+      if (footerData.responseTime) {
+        html += `Average response time: <span class="highlight">${footerData.responseTime}</span> • `;
+      }
+      
+      if (footerData.urgentInfo) {
+        html += footerData.urgentInfo;
+      } else {
+        html += 'For urgent queries, use Telegram support';
+      }
+      
+      footerText.innerHTML = html;
+    }
+
+    // Show default content
+    function showDefaultContent() {
+      // Default contact methods
+      const defaultMethods = [
+        { type: 'Telegram', value: 'https://t.me/EliteProsSupport', label: 'Telegram Support', enabled: true },
+        { type: 'WhatsApp', value: 'https://wa.me/911234567890', label: 'WhatsApp Chat', enabled: true },
+        { type: 'Email', value: 'support@elitepros.com', label: 'Email Support', enabled: true },
+        { type: 'Phone', value: '+911234567890', label: 'Call Support', enabled: true }
+      ];
+      
+      renderContactMethods(defaultMethods);
+      
+      // Default timings
+      renderSupportTimings({
+        startTime: '4:00 PM',
+        endTime: '10:00 PM',
+        label: 'Available Daily'
+      });
+      
+      // Default social platforms
+      const defaultPlatforms = [
+        { platform: 'Instagram', url: 'https://instagram.com/elitepros', enabled: true },
+        { platform: 'YouTube', url: 'https://youtube.com/elitepros', enabled: true },
+        { platform: 'Telegram', url: 'https://t.me/EliteProsOfficial', enabled: true },
+        { platform: 'WhatsApp', url: 'https://wa.me/911234567890', enabled: true }
+      ];
+      
+      renderSocialPlatforms(defaultPlatforms);
+      
+      // Default footer
+      renderFooterText({
+        responseTime: 'within 24 hours',
+        urgentInfo: 'For urgent queries, use Telegram support'
+      });
+    }
+
+    // Initialize the page
+    document.addEventListener('DOMContentLoaded', function() {
+      // Set app logo
+      const appLogo = document.getElementById('appLogo');
+      if (appLogo) {
+        appLogo.src = 'http://elitepros.wuaze.com/IMG-20260106-WA0000.jpg';
+        appLogo.onerror = function() {
+          this.src = 'https://via.placeholder.com/44/1f2340/ffffff?text=EP';
+        };
+      }
+      
+      // Load contact data
+      loadContactData();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,440 @@
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy Policy - ElitePros</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+
+<style>
+    :root {
+        --bg-dark: #0b1020;
+        --card-bg: #1f2340;
+        --card-dark: #121322;
+        --accent: #3f3ef2;
+        --muted: #9aa3b2;
+        --header-bg: #111827;
+    }
+    
+    body {
+        background: var(--bg-dark);
+        color: white;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+        margin: 0;
+        padding: 0;
+        padding-bottom: 20px;
+    }
+    
+    /* Header */
+    .header-bar {
+        background: var(--header-bg);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 16px;
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    }
+    
+    .header-center {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        justify-content: center;
+        flex: 1;
+    }
+    
+    .app-logo {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 2px solid rgba(99, 102, 241, 0.5);
+    }
+    
+    .header-title {
+        font-weight: 700;
+        font-size: 1.25rem;
+        background: linear-gradient(135deg, #fff, #a5b4fc);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        letter-spacing: 0.5px;
+    }
+    
+    /* Back Button */
+    .back-btn {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #1f2937, #111827);
+        border: 1px solid rgba(255,255,255,0.1);
+        color: #cbd5e1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        flex-shrink: 0;
+    }
+    
+    .back-btn:hover {
+        background: linear-gradient(135deg, #2d3748, #1f2937);
+        color: white;
+        border-color: rgba(99, 102, 241, 0.3);
+        transform: translateX(-2px);
+    }
+    
+    .back-btn i {
+        font-size: 1.25rem;
+    }
+    
+    /* Content Container */
+    .content-container {
+        padding: 20px 16px;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    
+    /* Policy Card */
+    .policy-card {
+        background: linear-gradient(135deg, #1f2340 0%, #121322 100%);
+        border-radius: 20px;
+        padding: 24px;
+        margin-bottom: 20px;
+        border: 1px solid rgba(255,255,255,0.1);
+        box-shadow: 0 10px 40px rgba(2,6,23,0.8);
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .policy-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 50px rgba(63, 62, 242, 0.3);
+        border-color: rgba(63, 62, 242, 0.3);
+    }
+    
+    .policy-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(135deg, #10b981, #059669);
+        border-radius: 20px 20px 0 0;
+    }
+    
+    .policy-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 20px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .policy-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #10b981, #059669);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: white;
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+    }
+    
+    .policy-title {
+        font-weight: 800;
+        font-size: 1.75rem;
+        background: linear-gradient(135deg, #fff, #a5b4fc);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        letter-spacing: 0.5px;
+    }
+    
+    /* Policy Content */
+    .policy-content {
+        color: #e5e7eb;
+        line-height: 1.8;
+        font-size: 1rem;
+    }
+    
+    .policy-content h2 {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #10b981;
+        margin: 20px 0 10px 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .policy-content h2 i {
+        color: #3f3ef2;
+        font-size: 1rem;
+    }
+    
+    .policy-content p {
+        margin-bottom: 15px;
+        color: #cbd5e1;
+    }
+    
+    .policy-content ul {
+        margin-left: 20px;
+        margin-bottom: 15px;
+    }
+    
+    .policy-content li {
+        margin-bottom: 8px;
+        color: #cbd5e1;
+    }
+    
+    /* Skeleton Loader */
+    .skeleton-container {
+        padding: 20px 16px;
+    }
+    
+    .skeleton-shimmer {
+        background: linear-gradient(90deg, 
+            rgba(255, 255, 255, 0.05) 25%, 
+            rgba(255, 255, 255, 0.1) 50%, 
+            rgba(255, 255, 255, 0.05) 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite;
+        border-radius: 8px;
+    }
+    
+    @keyframes shimmer {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+    }
+    
+    .skeleton-title {
+        height: 32px;
+        width: 200px;
+        margin-bottom: 20px;
+    }
+    
+    .skeleton-content {
+        height: 400px;
+        border-radius: 20px;
+    }
+    
+    /* Loading Container */
+    .loading-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 300px;
+        padding: 40px 20px;
+    }
+    
+    .loading-spinner {
+        width: 60px;
+        height: 60px;
+        border: 3px solid rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        border-top-color: #10b981;
+        animation: spin 1s ease-in-out infinite;
+        margin-bottom: 20px;
+    }
+    
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+    
+    .loading-text {
+        color: #9ca3af;
+        font-size: 1rem;
+        font-weight: 600;
+    }
+</style>
+</head>
+<body>
+
+    <!-- Header -->
+    <div class="header-bar">
+        <button class="back-btn" onclick="goBack()">
+            <i class="fas fa-arrow-left"></i>
+        </button>
+        
+        <div class="header-center">
+            <div class="app-logo">
+                <img id="appLogo" src="https://i.ibb.co/Y7SksQy9/IMG-20250830-082315-071.jpg" alt="ElitePros" style="width:100%;height:100%;object-fit:cover;">
+            </div>
+            <div class="header-title">Privacy Policy</div>
+        </div>
+        
+        <div style="width: 44px;"></div> <!-- Spacer for alignment -->
+    </div>
+
+    <!-- Skeleton Loader -->
+    <div id="skeletonContainer" class="skeleton-container">
+        <div class="skeleton-title skeleton-shimmer"></div>
+        <div class="skeleton-content skeleton-shimmer"></div>
+    </div>
+
+    <!-- Loading Container -->
+    <div id="loadingContainer" class="loading-container" style="display: none;">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Loading Privacy Policy...</div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="mainContent" class="content-container" style="display: none;">
+        <div class="policy-card">
+            <div class="policy-header">
+                <div class="policy-icon">
+                    <i class="fas fa-shield-halved"></i>
+                </div>
+                <div class="policy-title">Privacy Policy</div>
+            </div>
+            
+            <div class="policy-content" id="policyContent">
+                <!-- Content will be loaded dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ====================================================================
+        // FIREBASE CONFIGURATION
+        // ====================================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyC86fii3isDnSOof71h_18PdZehzCEFIFw",
+            authDomain: "eliteprosofficial.firebaseapp.com",
+            databaseURL: "https://eliteprosofficial-default-rtdb.firebaseio.com",
+            projectId: "eliteprosofficial",
+            storageBucket: "eliteprosofficial.firebasestorage.app",
+            messagingSenderId: "646561207100",
+            appId: "1:646561207100:web:47de7b648695367e208439",
+            measurementId: "G-ZN5VNFCSEL"
+        };
+        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // DOM Elements
+        const skeletonContainer = document.getElementById('skeletonContainer');
+        const loadingContainer = document.getElementById('loadingContainer');
+        const mainContent = document.getElementById('mainContent');
+        const policyContent = document.getElementById('policyContent');
+
+        // Navigation Function
+        function goBack() {
+            if (history.length > 1) {
+                history.back();
+            } else {
+                window.location.href = 'home.html';
+            }
+        }
+
+        // Load Policy Content from Firebase
+        function loadPolicyContent() {
+            // Show loading, hide skeleton
+            skeletonContainer.style.display = 'none';
+            loadingContainer.style.display = 'flex';
+            mainContent.style.display = 'none';
+            
+            database.ref('pageContent/privacy').once('value')
+                .then(snapshot => {
+                    const contentData = snapshot.val();
+                    
+                    if (contentData && contentData.content) {
+                        // Parse and format the content
+                        displayPolicyContent(contentData.content);
+                    } else {
+                        // Fallback to default content
+                        displayDefaultContent();
+                    }
+                    
+                    // Show main content, hide loading
+                    loadingContainer.style.display = 'none';
+                    mainContent.style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Error loading policy content:', error);
+                    displayDefaultContent();
+                    loadingContainer.style.display = 'none';
+                    mainContent.style.display = 'block';
+                });
+        }
+
+        function displayPolicyContent(content) {
+            // Split content by lines and format
+            const lines = content.split('\n');
+            let formattedContent = '';
+            
+            lines.forEach(line => {
+                line = line.trim();
+                if (line) {
+                    // Check if line is a section title (starts with number)
+                    if (/^\d+\.\s+/.test(line)) {
+                        const title = line.replace(/^\d+\.\s+/, '');
+                        formattedContent += `<h2><i class="fas fa-shield"></i> ${title}</h2>`;
+                    } else if (/^[A-Z][a-z\s]+:/.test(line)) {
+                        // For lines that might be headings with colon
+                        formattedContent += `<h2><i class="fas fa-check-circle"></i> ${line}</h2>`;
+                    } else {
+                        formattedContent += `<p>${line}</p>`;
+                    }
+                }
+            });
+            
+            policyContent.innerHTML = formattedContent || '<p>No privacy policy content available.</p>';
+        }
+
+        function displayDefaultContent() {
+            const defaultContent = `
+                <h2><i class="fas fa-shield"></i> 1. Introduction</h2>
+                <p>We value your privacy and are committed to protecting your personal data. This Privacy Policy explains how we collect, use, and safeguard your information when you use our app.</p>
+                
+                <h2><i class="fas fa-database"></i> 2. Information We Collect</h2>
+                <p>We may collect information such as your name, email address, in-game name, transaction history, and device information to provide and improve our services.</p>
+                
+                <h2><i class="fas fa-cogs"></i> 3. How We Use Your Information</h2>
+                <p>Your data is used to enhance your experience, provide personalized services, process payments, notify you about updates, and maintain security of your account.</p>
+                
+                <h2><i class="fas fa-share-alt"></i> 4. Sharing Information</h2>
+                <p>We do not sell your personal information. We may share your data with trusted partners to provide services, comply with legal obligations, or prevent fraud.</p>
+                
+                <h2><i class="fas fa-lock"></i> 5. Security</h2>
+                <p>We implement appropriate technical and organizational measures to protect your personal data from unauthorized access, disclosure, or loss.</p>
+                
+                <h2><i class="fas fa-user-check"></i> 6. Your Rights</h2>
+                <p>You have the right to access, correct, or delete your personal data. You can also object to or restrict processing under certain circumstances. Contact us for any requests.</p>
+                
+                <h2><i class="fas fa-sync-alt"></i> 7. Changes to This Policy</h2>
+                <p>We may update this Privacy Policy occasionally. Any changes will be posted on this page with the revised date. We encourage you to review this policy periodically.</p>
+            `;
+            
+            policyContent.innerHTML = defaultContent;
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Show skeleton initially
+            skeletonContainer.style.display = 'block';
+            loadingContainer.style.display = 'none';
+            mainContent.style.display = 'none';
+            
+            // Load content after a brief delay
+            setTimeout(() => {
+                loadPolicyContent();
+            }, 300);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Terms & Conditions - ElitePros</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+
+<style>
+    :root {
+        --bg-dark: #0b1020;
+        --card-bg: #1f2340;
+        --card-dark: #121322;
+        --accent: #3f3ef2;
+        --muted: #9aa3b2;
+        --header-bg: #111827;
+    }
+    
+    body {
+        background: var(--bg-dark);
+        color: white;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+        margin: 0;
+        padding: 0;
+        padding-bottom: 20px;
+    }
+    
+    /* Header */
+    .header-bar {
+        background: var(--header-bg);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 16px;
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    }
+    
+    .header-center {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        justify-content: center;
+        flex: 1;
+    }
+    
+    .app-logo {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 2px solid rgba(99, 102, 241, 0.5);
+    }
+    
+    .header-title {
+        font-weight: 700;
+        font-size: 1.25rem;
+        background: linear-gradient(135deg, #fff, #a5b4fc);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        letter-spacing: 0.5px;
+    }
+    
+    /* Back Button */
+    .back-btn {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #1f2937, #111827);
+        border: 1px solid rgba(255,255,255,0.1);
+        color: #cbd5e1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        flex-shrink: 0;
+    }
+    
+    .back-btn:hover {
+        background: linear-gradient(135deg, #2d3748, #1f2937);
+        color: white;
+        border-color: rgba(99, 102, 241, 0.3);
+        transform: translateX(-2px);
+    }
+    
+    .back-btn i {
+        font-size: 1.25rem;
+    }
+    
+    /* Content Container */
+    .content-container {
+        padding: 20px 16px;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    
+    /* Policy Card */
+    .policy-card {
+        background: linear-gradient(135deg, #1f2340 0%, #121322 100%);
+        border-radius: 20px;
+        padding: 24px;
+        margin-bottom: 20px;
+        border: 1px solid rgba(255,255,255,0.1);
+        box-shadow: 0 10px 40px rgba(2,6,23,0.8);
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .policy-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 50px rgba(63, 62, 242, 0.3);
+        border-color: rgba(63, 62, 242, 0.3);
+    }
+    
+    .policy-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(135deg, #facc15, #f59e0b);
+        border-radius: 20px 20px 0 0;
+    }
+    
+    .policy-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 20px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .policy-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #3f3ef2, #6366f1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: white;
+        box-shadow: 0 4px 15px rgba(63, 62, 242, 0.4);
+    }
+    
+    .policy-title {
+        font-weight: 800;
+        font-size: 1.75rem;
+        background: linear-gradient(135deg, #fff, #a5b4fc);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        letter-spacing: 0.5px;
+    }
+    
+    /* Policy Content */
+    .policy-content {
+        color: #e5e7eb;
+        line-height: 1.8;
+        font-size: 1rem;
+    }
+    
+    .policy-content h2 {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #facc15;
+        margin: 20px 0 10px 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .policy-content h2 i {
+        color: #3f3ef2;
+        font-size: 1rem;
+    }
+    
+    .policy-content p {
+        margin-bottom: 15px;
+        color: #cbd5e1;
+    }
+    
+    /* Skeleton Loader */
+    .skeleton-container {
+        padding: 20px 16px;
+    }
+    
+    .skeleton-shimmer {
+        background: linear-gradient(90deg, 
+            rgba(255, 255, 255, 0.05) 25%, 
+            rgba(255, 255, 255, 0.1) 50%, 
+            rgba(255, 255, 255, 0.05) 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite;
+        border-radius: 8px;
+    }
+    
+    @keyframes shimmer {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+    }
+    
+    .skeleton-title {
+        height: 32px;
+        width: 200px;
+        margin-bottom: 20px;
+    }
+    
+    .skeleton-content {
+        height: 300px;
+        border-radius: 20px;
+    }
+    
+    /* Loading Container */
+    .loading-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 300px;
+        padding: 40px 20px;
+    }
+    
+    .loading-spinner {
+        width: 60px;
+        height: 60px;
+        border: 3px solid rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        border-top-color: #3f3ef2;
+        animation: spin 1s ease-in-out infinite;
+        margin-bottom: 20px;
+    }
+    
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+    
+    .loading-text {
+        color: #9ca3af;
+        font-size: 1rem;
+        font-weight: 600;
+    }
+</style>
+</head>
+<body>
+
+    <!-- Header -->
+    <div class="header-bar">
+        <button class="back-btn" onclick="goBack()">
+            <i class="fas fa-arrow-left"></i>
+        </button>
+        
+        <div class="header-center">
+            <div class="app-logo">
+                <img id="appLogo" src="https://i.ibb.co/Y7SksQy9/IMG-20250830-082315-071.jpg" alt="ElitePros" style="width:100%;height:100%;object-fit:cover;">
+            </div>
+            <div class="header-title">Terms & Conditions</div>
+        </div>
+        
+        <div style="width: 44px;"></div>
+    </div>
+
+    <!-- Skeleton Loader -->
+    <div id="skeletonContainer" class="skeleton-container">
+        <div class="skeleton-title skeleton-shimmer"></div>
+        <div class="skeleton-content skeleton-shimmer"></div>
+    </div>
+
+    <!-- Loading Container -->
+    <div id="loadingContainer" class="loading-container" style="display: none;">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Loading Terms & Conditions...</div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="mainContent" class="content-container" style="display: none;">
+        <div class="policy-card">
+            <div class="policy-header">
+                <div class="policy-icon">
+                    <i class="fas fa-file-contract"></i>
+                </div>
+                <div class="policy-title">Terms & Conditions</div>
+            </div>
+            
+            <div class="policy-content" id="termsContent">
+                <!-- Content will be loaded dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ====================================================================
+        // FIREBASE CONFIGURATION
+        // ====================================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyC86fii3isDnSOof71h_18PdZehzCEFIFw",
+            authDomain: "eliteprosofficial.firebaseapp.com",
+            databaseURL: "https://eliteprosofficial-default-rtdb.firebaseio.com",
+            projectId: "eliteprosofficial",
+            storageBucket: "eliteprosofficial.firebasestorage.app",
+            messagingSenderId: "646561207100",
+            appId: "1:646561207100:web:47de7b648695367e208439",
+            measurementId: "G-ZN5VNFCSEL"
+        };
+        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // DOM Elements
+        const skeletonContainer = document.getElementById('skeletonContainer');
+        const loadingContainer = document.getElementById('loadingContainer');
+        const mainContent = document.getElementById('mainContent');
+        const termsContent = document.getElementById('termsContent');
+
+        // Navigation Function
+        function goBack() {
+            if (history.length > 1) {
+                history.back();
+            } else {
+                window.location.href = 'home.html';
+            }
+        }
+
+        // Load Terms Content from Firebase
+        function loadTermsContent() {
+            skeletonContainer.style.display = 'none';
+            loadingContainer.style.display = 'flex';
+            mainContent.style.display = 'none';
+            
+            database.ref('pageContent/terms').once('value')
+                .then(snapshot => {
+                    const contentData = snapshot.val();
+                    
+                    if (contentData && contentData.content) {
+                        displayTermsContent(contentData.content);
+                    } else {
+                        displayDefaultContent();
+                    }
+                    
+                    loadingContainer.style.display = 'none';
+                    mainContent.style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Error loading terms content:', error);
+                    displayDefaultContent();
+                    loadingContainer.style.display = 'none';
+                    mainContent.style.display = 'block';
+                });
+        }
+
+        function displayTermsContent(content) {
+            const lines = content.split('\n');
+            let formattedContent = '';
+            
+            lines.forEach(line => {
+                line = line.trim();
+                if (line) {
+                    if (/^\d+\.\s+/.test(line)) {
+                        const title = line.replace(/^\d+\.\s+/, '');
+                        formattedContent += `<h2><i class="fas fa-gavel"></i> ${title}</h2>`;
+                    } else {
+                        formattedContent += `<p>${line}</p>`;
+                    }
+                }
+            });
+            
+            termsContent.innerHTML = formattedContent || '<p>No terms content available.</p>';
+        }
+
+        function displayDefaultContent() {
+            const defaultContent = `
+                <h2><i class="fas fa-gavel"></i> 1. Acceptance of Terms</h2>
+                <p>By using our app, you agree to comply with and be bound by these Terms & Conditions. If you do not agree, please do not use the app.</p>
+                
+                <h2><i class="fas fa-user-shield"></i> 2. User Accounts</h2>
+                <p>You must provide accurate and complete information when creating an account. You are responsible for maintaining the confidentiality of your account credentials.</p>
+                
+                <h2><i class="fas fa-trophy"></i> 3. Tournament Participation Guidelines</h2>
+                <p>All participants must adhere to our Fair Play Policy. Any violation may result in account suspension or permanent banning. Prizes, winnings, and withdrawals may be forfeited if the policy is breached.</p>
+                
+                <h2><i class="fas fa-mobile-alt"></i> 4. App Usage</h2>
+                <p>You agree to use the app in accordance with all applicable laws and regulations. Any misuse, fraud, or illegal activities are strictly prohibited.</p>
+                
+                <h2><i class="fas fa-money-bill-wave"></i> 5. Payments and Transactions</h2>
+                <p>All transactions made through the app must be accurate and authorized. We are not responsible for unauthorized payments or errors caused by users.</p>
+                
+                <h2><i class="fas fa-copyright"></i> 6. Intellectual Property</h2>
+                <p>All content, graphics, logos, and software in the app are our property or used with permission. You may not copy, reproduce, or distribute any materials without authorization.</p>
+                
+                <h2><i class="fas fa-ban"></i> 7. Termination</h2>
+                <p>We may suspend or terminate your account for violations of these Terms & Conditions or any applicable laws.</p>
+                
+                <h2><i class="fas fa-edit"></i> 8. Changes to Terms</h2>
+                <p>We reserve the right to update or modify these Terms & Conditions at any time. Updates will be posted in the app, and continued use constitutes acceptance.</p>
+                
+                <h2><i class="fas fa-headset"></i> 9. Contact</h2>
+                <p>If you have any questions regarding these Terms & Conditions, please contact our support team through the app.</p>
+            `;
+            
+            termsContent.innerHTML = defaultContent;
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            skeletonContainer.style.display = 'block';
+            loadingContainer.style.display = 'none';
+            mainContent.style.display = 'none';
+            
+            setTimeout(() => {
+                loadTermsContent();
+            }, 300);
+        });
+    </script>
+</body>
+</html>

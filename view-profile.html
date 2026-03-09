@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>View Profile - ElitePros</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+  
+  <style>
+    :root {
+      --bg-dark: #0b1020;
+      --card-bg: #1f2340;
+      --card-dark: #121322;
+      --accent: #3f3ef2;
+      --muted: #9aa3b2;
+    }
+    
+    body {
+      background: var(--bg-dark);
+      color: white;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      margin: 0;
+      padding: 0;
+      padding-bottom: 20px;
+    }
+    
+    /* Header - Centered Icon + Label (Inline) */
+    .header-bar {
+      background: var(--card-dark);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      position: relative;
+    }
+
+    .centered-logo-inline-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .app-logo-header {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 2px solid rgba(99, 102, 241, 0.5);
+      flex-shrink: 0;
+    }
+
+    .centered-logo-inline-label {
+      font-weight: 800;
+      font-size: 18px;
+      background: linear-gradient(135deg, #fff, #a5b4fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      white-space: nowrap;
+    }
+
+    .back-btn {
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      color: white;
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      flex-shrink: 0;
+    }
+
+    .back-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+    
+    /* Profile Section */
+    .profile-section {
+      padding: 0 16px;
+    }
+    
+    .profile-card {
+      background: linear-gradient(135deg, #1f2340, #121322);
+      border-radius: 20px;
+      padding: 24px;
+      margin-bottom: 20px;
+      border: 2px solid transparent;
+      box-shadow: 0 12px 35px rgba(2,6,23,0.8);
+      background: linear-gradient(135deg, #1f2340, #121322) padding-box,
+                  linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05)) border-box;
+    }
+    
+    .profile-header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    
+    .profile-avatar {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 4px solid rgba(99, 102, 241, 0.5);
+      background: linear-gradient(135deg, #3f3ef2, #8b5cf6);
+    }
+    
+    .profile-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .avatar-placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      color: white;
+    }
+    
+    .profile-name {
+      font-weight: 800;
+      font-size: 24px;
+      background: linear-gradient(135deg, #fff, #a5b4fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-align: center;
+    }
+    
+    .profile-username {
+      font-size: 16px;
+      color: #9ca3af;
+      text-align: center;
+    }
+    
+    .profile-bio {
+      text-align: center;
+      color: #d1d5db;
+      font-size: 15px;
+      line-height: 1.5;
+      margin-bottom: 24px;
+      padding: 16px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    /* Stats Cards Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    
+    @media (max-width: 480px) {
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .stat-card {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      padding: 20px;
+      border: 1px solid rgba(255,255,255,0.1);
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+    
+    .stat-card:hover {
+      background: rgba(255, 255, 255, 0.08);
+      transform: translateY(-3px);
+      border-color: var(--accent);
+    }
+    
+    .stat-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 12px;
+      font-size: 1.5rem;
+      color: white;
+    }
+    
+    .stat-icon.matches {
+      background: linear-gradient(135deg, #3f3ef2, #6366f1);
+    }
+    
+    .stat-icon.winnings {
+      background: linear-gradient(135deg, #facc15, #eab308);
+    }
+    
+    .stat-icon.date {
+      background: linear-gradient(135deg, #10b981, #059669);
+    }
+    
+    .stat-label {
+      font-weight: 600;
+      font-size: 14px;
+      color: #9ca3af;
+      margin-bottom: 8px;
+    }
+    
+    .stat-value {
+      font-weight: 800;
+      font-size: 20px;
+      color: white;
+    }
+    
+    .winnings-value {
+      color: #facc15;
+    }
+    
+    .matches-value {
+      color: #a5b4fc;
+    }
+    
+    /* Joined Date Card */
+    .joined-card {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.05));
+      border-radius: 16px;
+      padding: 20px;
+      text-align: center;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      margin-bottom: 24px;
+    }
+    
+    .joined-label {
+      font-size: 14px;
+      color: #9ca3af;
+      margin-bottom: 8px;
+    }
+    
+    .joined-date {
+      font-weight: 800;
+      font-size: 22px;
+      background: linear-gradient(135deg, #10b981, #34d399);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    /* Footer Message */
+    .footer-message {
+      text-align: center;
+      color: #6b7280;
+      font-size: 13px;
+      margin-top: 30px;
+      padding: 0 16px;
+    }
+    
+    .highlight {
+      color: #10b981;
+      font-weight: 600;
+    }
+    
+    /* Loading States */
+    .loading-container {
+      padding: 40px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #9ca3af;
+    }
+    
+    .loading-container i {
+      font-size: 2rem;
+      margin-bottom: 16px;
+    }
+    
+    .skeleton-shimmer {
+      background: linear-gradient(90deg, 
+          rgba(255, 255, 255, 0.05) 25%, 
+          rgba(255, 255, 255, 0.1) 50%, 
+          rgba(255, 255, 255, 0.05) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 12px;
+    }
+    
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+    
+    .skeleton-card {
+      height: 200px;
+      margin-bottom: 20px;
+    }
+    
+    .skeleton-avatar {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      margin: 0 auto 20px;
+    }
+    
+    /* Error Message */
+    .error-card {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      border-radius: 20px;
+      padding: 30px;
+      margin: 40px 16px;
+      text-align: center;
+      box-shadow: 0 12px 35px rgba(239, 68, 68, 0.3);
+    }
+    
+    .error-icon {
+      font-size: 3rem;
+      margin-bottom: 16px;
+      color: white;
+    }
+    
+    .error-title {
+      font-weight: 800;
+      font-size: 20px;
+      margin-bottom: 12px;
+      color: white;
+    }
+    
+    .error-message {
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 14px;
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+    
+    .back-home-btn {
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .back-home-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Header - Centered Icon + Label (Inline) -->
+  <div class="header-bar">
+    <button class="back-btn" onclick="goBack()">
+      <i class="fa-solid fa-arrow-left"></i>
+    </button>
+    
+    <!-- Centered Logo + Label Container (Inline) -->
+    <div class="centered-logo-inline-container">
+      <div class="app-logo-header">
+        <img id="appLogo" src="http://elitepros.wuaze.com/IMG-20260106-WA0000.jpg" alt="ElitePros" style="width:100%;height:100%;object-fit:cover;">
+      </div>
+      <div class="centered-logo-inline-label">View Profile</div>
+    </div>
+    
+    <!-- Empty div for spacing -->
+    <div style="width:44px;"></div>
+  </div>
+
+  <!-- Loading State -->
+  <div id="loadingContainer" class="profile-section">
+    <div class="profile-card skeleton-shimmer skeleton-card">
+      <div class="skeleton-shimmer skeleton-avatar"></div>
+    </div>
+    <div class="profile-card skeleton-shimmer skeleton-card"></div>
+  </div>
+
+  <!-- Error State -->
+  <div id="errorContainer" class="profile-section" style="display: none;">
+    <div class="error-card">
+      <div class="error-icon">
+        <i class="fa-solid fa-user-slash"></i>
+      </div>
+      <div class="error-title" id="errorTitle">Profile Not Found</div>
+      <div class="error-message" id="errorMessage">
+        The profile you're looking for doesn't exist or has been removed.
+      </div>
+      <button class="back-home-btn" onclick="window.location.href='home.html'">
+        <i class="fa-solid fa-house"></i> Back to Home
+      </button>
+    </div>
+  </div>
+
+  <!-- Profile Content -->
+  <div id="profileContent" class="profile-section" style="display: none;">
+    
+    <!-- Profile Info Card -->
+    <div class="profile-card">
+      <div class="profile-header">
+        <div class="profile-avatar" id="profileAvatar">
+          <!-- Avatar will be loaded dynamically -->
+          <div class="avatar-placeholder">
+            <i class="fa-solid fa-user"></i>
+          </div>
+        </div>
+        <div>
+          <div class="profile-name" id="profileName">Loading...</div>
+          <div class="profile-username" id="profileUsername">@username</div>
+        </div>
+      </div>
+      
+      <div class="profile-bio" id="profileBio">
+        <!-- Bio will be loaded dynamically -->
+      </div>
+      
+      <div class="stats-grid">
+        <!-- Total Matches Played -->
+        <div class="stat-card">
+          <div class="stat-icon matches">
+            <i class="fa-solid fa-gamepad"></i>
+          </div>
+          <div class="stat-label">Total Matches Played</div>
+          <div class="stat-value matches-value" id="totalMatches">0</div>
+        </div>
+        
+        <!-- Lifetime Winnings -->
+        <div class="stat-card">
+          <div class="stat-icon winnings">
+            <i class="fa-solid fa-trophy"></i>
+          </div>
+          <div class="stat-label">Lifetime Winnings</div>
+          <div class="stat-value winnings-value" id="lifetimeWinnings">₹0</div>
+        </div>
+      </div>
+      
+      <!-- Joined Date -->
+      <div class="joined-card">
+        <div class="joined-label">Member Since</div>
+        <div class="joined-date" id="joinedDate">Loading...</div>
+      </div>
+    </div>
+    
+    <div class="footer-message">
+      <i class="fa-solid fa-circle-info highlight"></i> This is a public profile view. Some details may be hidden for privacy.
+    </div>
+  </div>
+
+  <script>
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyC86fii3isDnSOof71h_18PdZehzCEFIFw",
+      authDomain: "eliteprosofficial.firebaseapp.com",
+      databaseURL: "https://eliteprosofficial-default-rtdb.firebaseio.com",
+      projectId: "eliteprosofficial",
+      storageBucket: "eliteprosofficial.firebasestorage.app",
+      messagingSenderId: "646561207100",
+      appId: "1:646561207100:web:47de7b648695367e208439",
+      measurementId: "G-ZN5VNFCSEL"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    // DOM Elements
+    const loadingContainer = document.getElementById('loadingContainer');
+    const errorContainer = document.getElementById('errorContainer');
+    const profileContent = document.getElementById('profileContent');
+    const profileAvatar = document.getElementById('profileAvatar');
+    const profileName = document.getElementById('profileName');
+    const profileUsername = document.getElementById('profileUsername');
+    const profileBio = document.getElementById('profileBio');
+    const totalMatchesSpan = document.getElementById('totalMatches');
+    const lifetimeWinningsSpan = document.getElementById('lifetimeWinnings');
+    const joinedDateSpan = document.getElementById('joinedDate');
+    const errorTitle = document.getElementById('errorTitle');
+    const errorMessage = document.getElementById('errorMessage');
+
+    // Get UID from URL
+    function getUidFromUrl() {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get('uid');
+    }
+
+    // Go back function
+    function goBack() {
+      if (window.history.length > 1) {
+        window.history.back();
+      } else {
+        window.location.href = 'home.html';
+      }
+    }
+
+    // Format date
+    function formatDate(timestamp) {
+      if (!timestamp) return 'Unknown Date';
+      
+      const date = new Date(timestamp);
+      
+      // Check if timestamp is valid
+      if (isNaN(date.getTime())) {
+        // Try to parse as string
+        if (typeof timestamp === 'string' && timestamp.includes('-')) {
+          return timestamp;
+        }
+        return 'Unknown Date';
+      }
+      
+      const options = { year: 'numeric', month: 'long', day: 'numeric' };
+      return date.toLocaleDateString('en-US', options);
+    }
+
+    // Format bio (handle empty bio)
+    function formatBio(bioText) {
+      if (!bioText || bioText.trim() === '') {
+        return 'No bio available. This user hasn\'t added a bio yet.';
+      }
+      return bioText;
+    }
+
+    // Format username
+    function formatUsername(username) {
+      if (!username) return '@player';
+      if (!username.startsWith('@')) return '@' + username;
+      return username;
+    }
+
+    // Count total matches played from joinedPlayers (same as account.html)
+    async function countTotalMatchesPlayed(uid) {
+      try {
+        const joinedPlayersRef = database.ref('joinedPlayers');
+        const snapshot = await joinedPlayersRef.once('value');
+        const joinedPlayersData = snapshot.val();
+        
+        let totalMatches = 0;
+        
+        if (joinedPlayersData) {
+          Object.keys(joinedPlayersData).forEach(matchId => {
+            const matchData = joinedPlayersData[matchId];
+            
+            if (matchData && typeof matchData === 'object') {
+              if (matchData[uid]) {
+                totalMatches++;
+              }
+            }
+          });
+        }
+        
+        return totalMatches;
+      } catch (error) {
+        console.error('Error counting matches:', error);
+        return 0;
+      }
+    }
+
+    // Calculate lifetime winnings from transactions (same as account.html)
+    async function calculateLifetimeWinnings(uid) {
+      try {
+        const transactionsRef = database.ref('transactions');
+        const snapshot = await transactionsRef.once('value');
+        const transactionsData = snapshot.val();
+        
+        let totalWinnings = 0;
+        
+        if (transactionsData) {
+          if (transactionsData[uid]) {
+            const userTransactions = transactionsData[uid];
+            
+            Object.values(userTransactions).forEach(transaction => {
+              if (transaction && typeof transaction === 'object') {
+                if (transaction.type === 'match_winning' || 
+                    transaction.type === 'Match Winnings' ||
+                    transaction.type === 'credit') {
+                  
+                  const amount = parseFloat(transaction.amount || 0);
+                  if (amount > 0) {
+                    totalWinnings += amount;
+                  }
+                }
+              }
+            });
+          }
+          
+          Object.values(transactionsData).forEach(transaction => {
+            if (transaction && typeof transaction === 'object') {
+              if (transaction.userId === uid) {
+                if (transaction.type === 'match_winning' || 
+                    transaction.type === 'Match Winnings' ||
+                    transaction.type === 'credit') {
+                  
+                  const amount = parseFloat(transaction.amount || 0);
+                  if (amount > 0) {
+                    totalWinnings += amount;
+                  }
+                }
+              }
+            }
+          });
+        }
+        
+        return totalWinnings;
+      } catch (error) {
+        console.error('Error calculating winnings:', error);
+        return 0;
+      }
+    }
+
+    // Get winnings from wallet (fallback method)
+    async function getWinningsFromWallet(uid) {
+      try {
+        const userRef = database.ref('/users/' + uid + '/wallet');
+        const snapshot = await userRef.once('value');
+        const walletData = snapshot.val();
+        
+        if (walletData) {
+          const winnings = parseFloat(walletData.winning || walletData.winnings || 0);
+          return winnings;
+        }
+        return 0;
+      } catch (error) {
+        console.error('Error getting winnings from wallet:', error);
+        return 0;
+      }
+    }
+
+    // Load user profile data
+    async function loadUserProfile(uid) {
+      try {
+        // Load user data from Firebase
+        const userRef = database.ref('/users/' + uid);
+        const userSnapshot = await userRef.once('value');
+        const userData = userSnapshot.val();
+        
+        if (!userData) {
+          showError('Profile Not Found', 'This user profile does not exist.');
+          return;
+        }
+        
+        // Set profile information
+        const displayName = userData.username || userData.name || 'Anonymous Player';
+        const username = userData.username || userData.email?.split('@')[0] || 'player';
+        const bio = userData.bio || userData.description || '';
+        const createdAt = userData.createdAt || userData.dateJoined || Date.now();
+        
+        profileName.innerText = displayName;
+        profileUsername.innerText = formatUsername(username);
+        profileBio.innerText = formatBio(bio);
+        joinedDateSpan.innerText = formatDate(createdAt);
+        
+        // Set avatar if available
+        if (userData.photoURL || userData.profilePicture) {
+          const avatarUrl = userData.photoURL || userData.profilePicture;
+          profileAvatar.innerHTML = `<img src="${avatarUrl}" alt="${displayName}" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\"avatar-placeholder\"><i class=\"fa-solid fa-user\"></i></div>';">`;
+        }
+        
+        // Load statistics
+        const totalMatches = await countTotalMatchesPlayed(uid);
+        totalMatchesSpan.innerText = totalMatches.toLocaleString();
+        
+        let lifetimeWinnings = await calculateLifetimeWinnings(uid);
+        if (lifetimeWinnings === 0) {
+          lifetimeWinnings = await getWinningsFromWallet(uid);
+        }
+        
+        lifetimeWinningsSpan.innerText = `₹${lifetimeWinnings.toLocaleString()}`;
+        
+        // Show profile content
+        loadingContainer.style.display = 'none';
+        profileContent.style.display = 'block';
+        
+      } catch (error) {
+        console.error('Error loading profile:', error);
+        showError('Error Loading Profile', 'Unable to load profile information. Please try again.');
+      }
+    }
+
+    // Show error state
+    function showError(title, message) {
+      loadingContainer.style.display = 'none';
+      errorTitle.innerText = title;
+      errorMessage.innerText = message;
+      errorContainer.style.display = 'block';
+    }
+
+    // Initialize the page
+    document.addEventListener('DOMContentLoaded', function() {
+      // Set app logo
+      const appLogo = document.getElementById('appLogo');
+      if (appLogo) {
+        appLogo.src = 'http://elitepros.wuaze.com/IMG-20260106-WA0000.jpg';
+        appLogo.onerror = function() {
+          this.src = 'https://via.placeholder.com/44/1f2340/ffffff?text=EP';
+        };
+      }
+      
+      // Get UID from URL and load profile
+      const uid = getUidFromUrl();
+      
+      if (uid) {
+        loadUserProfile(uid);
+      } else {
+        showError('Invalid Profile Link', 'No user ID specified in the URL.');
+      }
+    });
+  </script>
+</body>
+</html>

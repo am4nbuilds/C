@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Withdraw Earnings</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+    body {
+      background: #0f1220;
+      color: #ffffff;
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    .card {
+      max-width: 420px;
+      margin: auto;
+      background: #161a2d;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0,0,0,.4);
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 16px;
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: none;
+      margin-bottom: 12px;
+      font-size: 16px;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: none;
+      font-size: 16px;
+      background: #4f46e5;
+      color: #fff;
+      cursor: pointer;
+    }
+    button:disabled {
+      background: #555;
+      cursor: not-allowed;
+    }
+    .msg {
+      margin-top: 12px;
+      text-align: center;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h2>Withdraw Earnings</h2>
+
+    <input
+      type="number"
+      id="amountInput"
+      placeholder="Enter amount (₹)"
+      min="1"
+    />
+
+    <button id="withdrawBtn">Request Withdrawal</button>
+
+    <div class="msg" id="msg"></div>
+  </div>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
+  <script>
+    /* ===============================
+       FIREBASE CONFIG (YOUR PROJECT)
+    =============================== */
+    const firebaseConfig = {
+      apiKey: "AIzaSyC86fii3isDnSOof71h_18PdZehzCEFIFw",
+      authDomain: "eliteprosofficial.firebaseapp.com",
+      databaseURL: "https://eliteprosofficial-default-rtdb.firebaseio.com",
+      projectId: "eliteprosofficial",
+      storageBucket: "eliteprosofficial.firebasestorage.app",
+      messagingSenderId: "646561207100",
+      appId: "1:646561207100:web:47de7b648695367e208439",
+      measurementId: "G-ZN5VNFCSEL"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    /* ===============================
+       CONSTANTS
+    =============================== */
+    const BACKEND_URL = "https://elitepros-backend.onrender.com";
+
+    const withdrawBtn = document.getElementById("withdrawBtn");
+    const amountInput = document.getElementById("amountInput");
+    const msg = document.getElementById("msg");
+
+    /* ===============================
+       WITHDRAW HANDLER
+    =============================== */
+    withdrawBtn.addEventListener("click", async () => {
+      msg.textContent = "";
+
+      const amount = Number(amountInput.value);
+      if (!amount || amount <= 0) {
+        msg.textContent = "Enter a valid amount";
+        return;
+      }
+
+      const user = auth.currentUser;
+      if (!user) {
+        msg.textContent = "You are not logged in";
+        return;
+      }
+
+      withdrawBtn.disabled = true;
+      withdrawBtn.textContent = "Processing...";
+
+      try {
+        const token = await user.getIdToken();
+
+        const res = await fetch(`${BACKEND_URL}/request-withdraw`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + token
+          },
+          body: JSON.stringify({ amount })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          msg.textContent = data.error || "Withdrawal failed";
+        } else {
+          msg.textContent =
+            "Withdrawal requested successfully. Status: PENDING";
+          amountInput.value = "";
+        }
+
+      } catch (err) {
+        msg.textContent = "Network error. Try again.";
+      }
+
+      withdrawBtn.disabled = false;
+      withdrawBtn.textContent = "Request Withdrawal";
+    });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account - ElitePros</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    
+    <style>
+        :root {
+            --bg-dark: #0b1020;
+            --card-bg: #1f2340;
+            --card-dark: #121322;
+            --accent: #3f3ef2;
+            --muted: #9aa3b2;
+            --primary-green: #4ade80;
+            --header-bg: #111827;
+            --wallet-bg: #1f2937;
+            --joined-color: #0d9488;
+        }
+        
+        body {
+            background: var(--bg-dark);
+            color: white;
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+            margin: 0;
+            padding: 0;
+            padding-bottom: 70px; /* Space for bottom navigation */
+            overflow-x: hidden;
+        }
+        
+        /* Header - Same as home.html */
+        .header-bar {
+            background: var(--header-bg);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        
+        .app-logo {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 2px solid rgba(99, 102, 241, 0.5);
+        }
+        
+        .welcome-message {
+            text-align: center;
+            flex: 1;
+            margin: 0 10px;
+        }
+        
+        .welcome-text {
+            font-weight: 600;
+            font-size: 14px;
+            color: #9ca3af;
+        }
+        
+        .username {
+            font-weight: 700;
+            font-size: 16px;
+            background: linear-gradient(135deg, #fff, #a5b4fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        /* Wallet Button */
+        .wallet-btn {
+            background: linear-gradient(135deg, var(--wallet-bg), #111827);
+            padding: 10px 14px;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s ease;
+            min-width: 100px;
+            justify-content: center;
+        }
+        
+        .wallet-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+        }
+        
+        .wallet-balance {
+            margin-left: 8px;
+            font-weight: 800;
+            font-size: 16px;
+            color: #facc15;
+            text-shadow: 0 2px 4px rgba(250, 204, 21, 0.3);
+        }
+        
+        .wallet-btn i {
+            font-size: 18px;
+        }
+        
+        /* Stats Cards - SQUARE SIZE */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin: 16px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #1f2340 0%, #121322 100%);
+            border-radius: 16px;
+            padding: 20px;
+            border: 2px solid transparent;
+            box-shadow: 0 8px 30px rgba(2,6,23,0.7);
+            text-align: center;
+            transition: all 0.3s ease;
+            
+            /* Square aspect ratio */
+            aspect-ratio: 1/1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            
+            /* Animated border gradient */
+            background: linear-gradient(135deg, #1f2340 0%, #121322 100%) padding-box,
+                        linear-gradient(135deg, #3f3ef2, #6366f1, #8b5cf6, #ec4899) border-box;
+            background-size: 400% 400%;
+            animation: borderGradient 4s ease infinite;
+        }
+        
+        @keyframes borderGradient {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(63, 62, 242, 0.4);
+        }
+        
+        .stat-icon {
+            font-size: 28px;
+            margin-bottom: 12px;
+        }
+        
+        .stat-title {
+            font-size: 14px;
+            color: #9ca3af;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: 800;
+            color: white;
+        }
+        
+        .matches-stat .stat-icon {
+            color: #3f3ef2;
+        }
+        
+        .matches-stat .stat-value {
+            color: #a5b4fc;
+        }
+        
+        .winnings-stat .stat-icon {
+            color: #facc15;
+        }
+        
+        .winnings-stat .stat-value {
+            color: #facc15;
+        }
+        
+        /* Account Options Grid - Now 8 options (2x4) */
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin: 0 16px 24px;
+        }
+        
+        .option-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+            border-radius: 16px;
+            padding: 16px;
+            border: 1.5px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            
+            /* Gradient border effect */
+            background: linear-gradient(135deg, var(--card-bg) 0%, var(--card-dark) 100%) padding-box,
+                        linear-gradient(135deg, rgba(63, 62, 242, 0.3), rgba(99, 102, 241, 0.2)) border-box;
+            box-shadow: 0 4px 20px rgba(2, 6, 23, 0.5);
+            
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        
+        .option-card:hover {
+            transform: translateY(-5px);
+            background: linear-gradient(135deg, rgba(31, 35, 64, 0.9), rgba(18, 19, 34, 0.9)) padding-box,
+                        linear-gradient(135deg, rgba(63, 62, 242, 0.5), rgba(99, 102, 241, 0.3)) border-box;
+            box-shadow: 0 8px 30px rgba(63, 62, 242, 0.25);
+        }
+        
+        .option-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 12px;
+            font-size: 20px;
+            color: white;
+        }
+        
+        .option-title {
+            font-weight: 700;
+            font-size: 13px;
+            color: #e5e7eb;
+        }
+        
+        /* Different colors for option icons */
+        .option-profile .option-icon {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+        }
+        
+        .option-wallet .option-icon {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+        
+        .option-contact .option-icon {
+            background: linear-gradient(135deg, #3f3ef2, #6366f1);
+        }
+        
+        .option-referral .option-icon {
+            background: linear-gradient(135deg, #ec4899, #db2777);
+        }
+        
+        .option-fairplay .option-icon {
+            background: linear-gradient(135deg, #06b6d4, #0891b2);
+        }
+        
+        .option-privacy .option-icon {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+        
+        .option-terms .option-icon {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+        }
+        
+        .option-about .option-icon {
+            background: linear-gradient(135deg, #f97316, #ea580c);
+        }
+        
+        .option-logout .option-icon {
+            background: linear-gradient(135deg, #374151, #1f2937);
+        }
+        
+        /* Bottom Navigation - Same as home.html */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, #111827, #1f2937);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 8px 0;
+            z-index: 1000;
+            border-top: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #9ca3af;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            padding: 8px 16px;
+            border-radius: 12px;
+            position: relative;
+            min-width: 70px;
+        }
+        
+        .nav-item:hover {
+            color: #a5b4fc;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .nav-item.active {
+            color: #ffffff;
+            background: linear-gradient(135deg, #3f3ef2, #6366f1);
+            box-shadow: 0 8px 25px rgba(63,62,242,0.25);
+            transform: translateY(-15px);
+        }
+        
+        .nav-item i {
+            font-size: 1.25rem;
+            margin-bottom: 4px;
+        }
+        
+        .nav-item span {
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        
+        /* Logout Button Special Styling */
+        .logout-btn {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.3);
+            margin: 20px 16px;
+            width: calc(100% - 32px);
+        }
+        
+        .logout-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(239, 68, 68, 0.4);
+        }
+        
+        /* Loading State */
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            color: #9ca3af;
+            font-size: 14px;
+        }
+        
+        .loading i {
+            color: #3f3ef2;
+        }
+        
+        /* Section Title */
+        .section-title {
+            font-weight: 800;
+            font-size: 18px;
+            margin: 20px 16px 16px;
+            letter-spacing: 0.5px;
+            background: linear-gradient(135deg, #fff, #a5b4fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        /* Error Message */
+        .error-message {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            padding: 12px 16px;
+            text-align: center;
+            margin: 16px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(239,68,68,0.3);
+        }
+        
+        .error-message i {
+            font-size: 16px;
+        }
+        
+        /* Skeleton Loading */
+        .skeleton-shimmer {
+            background: linear-gradient(90deg, 
+                rgba(255, 255, 255, 0.05) 25%, 
+                rgba(255, 255, 255, 0.1) 50%, 
+                rgba(255, 255, 255, 0.05) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 8px;
+        }
+        
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        
+        .skeleton-stat-card {
+            height: 120px;
+            border-radius: 16px;
+        }
+        
+        .skeleton-option-card {
+            height: 100px;
+            border-radius: 16px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header - Same as home.html -->
+    <div class="header-bar">
+        <div class="app-logo">
+            <img id="appLogo" src="http://elitepros.wuaze.com/IMG-20260106-WA0000.jpg" alt="ElitePros" style="width:100%;height:100%;object-fit:cover;">
+        </div>
+
+        <div class="welcome-message">
+            <div class="welcome-text">Account</div>
+            <div class="username" id="username">Loading...</div>
+        </div>
+
+        <div id="walletContainer" class="wallet-btn" onclick="window.location.href='wallet.html'">
+            <i class="fa-solid fa-wallet text-yellow-400"></i>
+            <span id="walletBalance" class="wallet-balance">₹0</span>
+        </div>
+    </div>
+
+    <!-- Skeleton Loader -->
+    <div id="skeletonContainer" class="content-container">
+        <!-- Stats Skeleton -->
+        <div class="section-title">Your Stats</div>
+        <div class="stats-container">
+            <div class="skeleton-stat-card skeleton-shimmer"></div>
+            <div class="skeleton-stat-card skeleton-shimmer"></div>
+        </div>
+
+        <!-- Options Skeleton -->
+        <div class="section-title">Account Options</div>
+        <div class="options-grid">
+            <div class="skeleton-option-card skeleton-shimmer"></div>
+            <div class="skeleton-option-card skeleton-shimmer"></div>
+            <div class="skeleton-option-card skeleton-shimmer"></div>
+            <div class="skeleton-option-card skeleton-shimmer"></div>
+            <div class="skeleton-option-card skeleton-shimmer"></div>
+            <div class="skeleton-option-card skeleton-shimmer"></div>
+            <div class="skeleton-option-card skeleton-shimmer"></div>
+            <div class="skeleton-option-card skeleton-shimmer"></div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="mainContent" class="content-container" style="display:none;">
+        <!-- Stats Section - Square Cards -->
+        <div class="section-title">Your Stats</div>
+        <div class="stats-container">
+            <!-- Total Matches Played -->
+            <div class="stat-card matches-stat">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-gamepad"></i>
+                </div>
+                <div class="stat-title">Total Matches Played</div>
+                <div class="stat-value" id="totalMatches">0</div>
+            </div>
+            
+            <!-- Lifetime Winnings -->
+            <div class="stat-card winnings-stat">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-trophy"></i>
+                </div>
+                <div class="stat-title">Lifetime Winnings</div>
+                <div class="stat-value" id="lifetimeWinnings">₹0</div>
+            </div>
+        </div>
+
+        <!-- Account Options - Removed Match Rules & Settings -->
+        <div class="section-title">Account Options</div>
+        <div class="options-grid">
+            <!-- Profile -->
+            <a href="profile.html" class="option-card option-profile">
+                <div class="option-icon">
+                    <i class="fa-solid fa-user"></i>
+                </div>
+                <div class="option-title">My Profile</div>
+            </a>
+            
+            <!-- Wallet -->
+            <a href="wallet.html" class="option-card option-wallet">
+                <div class="option-icon">
+                    <i class="fa-solid fa-wallet"></i>
+                </div>
+                <div class="option-title">Wallet</div>
+            </a>
+            
+            <!-- Contact Us -->
+            <a href="contact.html" class="option-card option-contact">
+                <div class="option-icon">
+                    <i class="fa-solid fa-headset"></i>
+                </div>
+                <div class="option-title">Contact Us</div>
+            </a>
+            
+            <!-- Referral Program -->
+            <a href="referral.html" class="option-card option-referral">
+                <div class="option-icon">
+                    <i class="fa-solid fa-gift"></i>
+                </div>
+                <div class="option-title">Referral Program</div>
+            </a>
+            
+            <!-- Fair Play Policy -->
+            <a href="fairplay.html" class="option-card option-fairplay">
+                <div class="option-icon">
+                    <i class="fa-solid fa-scale-balanced"></i>
+                </div>
+                <div class="option-title">Fair Play Policy</div>
+            </a>
+            
+            <!-- Privacy Policy -->
+            <a href="privacy.html" class="option-card option-privacy">
+                <div class="option-icon">
+                    <i class="fa-solid fa-shield"></i>
+                </div>
+                <div class="option-title">Privacy Policy</div>
+            </a>
+            
+            <!-- Terms & Conditions -->
+            <a href="terms.html" class="option-card option-terms">
+                <div class="option-icon">
+                    <i class="fa-solid fa-file-contract"></i>
+                </div>
+                <div class="option-title">Terms & Conditions</div>
+            </a>
+            
+            <!-- About Us -->
+            <a href="about.html" class="option-card option-about">
+                <div class="option-icon">
+                    <i class="fa-solid fa-circle-info"></i>
+                </div>
+                <div class="option-title">About Us</div>
+            </a>
+        </div>
+
+        <!-- Logout Button -->
+        <button class="logout-btn" onclick="logoutUser()">
+            <i class="fa-solid fa-right-from-bracket"></i>
+            Logout
+        </button>
+    </div>
+
+    <!-- Bottom Navigation - Same as home.html -->
+    <nav class="bottom-nav">
+        <a href="leaderboard.html" class="nav-item">
+            <i class="fa-solid fa-ranking-star"></i>
+            <span>Leaderboard</span>
+        </a>
+        <a href="home.html" class="nav-item">
+            <i class="fa-solid fa-house"></i>
+            <span>Home</span>
+        </a>
+        <a href="account.html" class="nav-item active">
+            <i class="fa-solid fa-user-circle"></i>
+            <span>Account</span>
+        </a>
+    </nav>
+
+    <script>
+        // ===== Firebase Config =====
+        const firebaseConfig = {
+            apiKey: "AIzaSyC86fii3isDnSOof71h_18PdZehzCEFIFw",
+            authDomain: "eliteprosofficial.firebaseapp.com",
+            databaseURL: "https://eliteprosofficial-default-rtdb.firebaseio.com",
+            projectId: "eliteprosofficial",
+            storageBucket: "eliteprosofficial.firebasestorage.app",
+            messagingSenderId: "646561207100",
+            appId: "1:646561207100:web:47de7b648695367e208439",
+            measurementId: "G-ZN5VNFCSEL"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const auth = firebase.auth();
+
+        // DOM Elements
+        const skeletonContainer = document.getElementById('skeletonContainer');
+        const mainContent = document.getElementById('mainContent');
+        const usernameSpan = document.getElementById('username');
+        const walletContainer = document.getElementById('walletContainer');
+        const walletSpan = document.getElementById('walletBalance');
+        const totalMatchesSpan = document.getElementById('totalMatches');
+        const lifetimeWinningsSpan = document.getElementById('lifetimeWinnings');
+
+        // Global Variables
+        let USER_UID = null;
+
+        // Load wallet balance (same as home.html)
+        function loadUserWalletBalance(uid) {
+            const userRef = database.ref('/users/' + uid + '/wallet');
+
+            userRef.on('value', snapshot => {
+                const walletData = snapshot.val();
+                let totalBalance = 0;
+                
+                if (walletData) {
+                    const winnings = parseFloat(walletData.winning || walletData.winnings || 0);
+                    const deposited = parseFloat(walletData.deposited || 0);
+                    totalBalance = winnings + deposited;
+                }
+                
+                walletSpan.innerHTML = `₹${totalBalance.toFixed(0).toLocaleString()}`;
+            }, error => {
+                console.error('Error loading wallet balance:', error);
+                walletSpan.innerHTML = '₹0';
+            });
+        }
+
+        // Count total matches played from joinedPlayers
+        async function countTotalMatchesPlayed(uid) {
+            try {
+                // Get all joinedPlayers data from Firebase
+                const joinedPlayersRef = database.ref('joinedPlayers');
+                const snapshot = await joinedPlayersRef.once('value');
+                const joinedPlayersData = snapshot.val();
+                
+                let totalMatches = 0;
+                
+                if (joinedPlayersData) {
+                    // Loop through each match in joinedPlayers
+                    Object.keys(joinedPlayersData).forEach(matchId => {
+                        const matchData = joinedPlayersData[matchId];
+                        
+                        // Check if this match has user data
+                        if (matchData && typeof matchData === 'object') {
+                            // Check if user ID exists in this match's joined players
+                            if (matchData[uid]) {
+                                totalMatches++;
+                            }
+                        }
+                    });
+                }
+                
+                console.log(`User ${uid} played ${totalMatches} matches`);
+                return totalMatches;
+            } catch (error) {
+                console.error('Error counting matches:', error);
+                return 0;
+            }
+        }
+
+        // Calculate lifetime winnings from transactions
+        async function calculateLifetimeWinnings(uid) {
+            try {
+                // Get all transactions data from Firebase
+                const transactionsRef = database.ref('transactions');
+                const snapshot = await transactionsRef.once('value');
+                const transactionsData = snapshot.val();
+                
+                let totalWinnings = 0;
+                
+                if (transactionsData) {
+                    // Look for user's transactions in the nested structure
+                    // First check if user has direct transactions
+                    if (transactionsData[uid]) {
+                        const userTransactions = transactionsData[uid];
+                        
+                        // User transactions are nested with transaction IDs
+                        Object.values(userTransactions).forEach(transaction => {
+                            if (transaction && typeof transaction === 'object') {
+                                // Check for match_winning type
+                                if (transaction.type === 'match_winning' || 
+                                    transaction.type === 'Match Winnings' ||
+                                    transaction.type === 'credit') {
+                                    
+                                    // Make sure it's a winning transaction and not a deposit/entry fee
+                                    const amount = parseFloat(transaction.amount || 0);
+                                    if (amount > 0) {
+                                        totalWinnings += amount;
+                                    }
+                                }
+                            }
+                        });
+                    }
+                    
+                    // Also check the root level transactions
+                    Object.values(transactionsData).forEach(transaction => {
+                        if (transaction && typeof transaction === 'object') {
+                            // Check if this transaction belongs to the user
+                            if (transaction.userId === uid) {
+                                // Check for winning types
+                                if (transaction.type === 'match_winning' || 
+                                    transaction.type === 'Match Winnings' ||
+                                    transaction.type === 'credit') {
+                                    
+                                    const amount = parseFloat(transaction.amount || 0);
+                                    if (amount > 0) {
+                                        totalWinnings += amount;
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+                
+                console.log(`User ${uid} total winnings: ₹${totalWinnings}`);
+                return totalWinnings;
+            } catch (error) {
+                console.error('Error calculating winnings:', error);
+                return 0;
+            }
+        }
+
+        // Alternative method to get winnings from user's wallet winnings field
+        async function getWinningsFromWallet(uid) {
+            try {
+                const userRef = database.ref('/users/' + uid + '/wallet');
+                const snapshot = await userRef.once('value');
+                const walletData = snapshot.val();
+                
+                if (walletData) {
+                    const winnings = parseFloat(walletData.winning || walletData.winnings || 0);
+                    console.log(`Winnings from wallet for ${uid}: ₹${winnings}`);
+                    return winnings;
+                }
+                return 0;
+            } catch (error) {
+                console.error('Error getting winnings from wallet:', error);
+                return 0;
+            }
+        }
+
+        // Load user data
+        async function loadUserData(uid) {
+            try {
+                // Load basic user info
+                const userRef = database.ref('/users/' + uid);
+                const userSnapshot = await userRef.once('value');
+                const userData = userSnapshot.val();
+                
+                // Set username in header
+                const user = auth.currentUser;
+                let displayName = 'Player';
+                
+                if (userData) {
+                    displayName = userData.username || userData.name || user?.displayName || user?.email?.split('@')[0] || 'Player';
+                } else if (user) {
+                    displayName = user.displayName || user.email?.split('@')[0] || 'Player';
+                }
+                
+                usernameSpan.innerText = displayName;
+                
+                // Load wallet balance
+                loadUserWalletBalance(uid);
+                
+                // Load total matches played - using joinedPlayers database
+                const totalMatches = await countTotalMatchesPlayed(uid);
+                totalMatchesSpan.innerText = totalMatches.toLocaleString();
+                
+                // Try to get winnings from transactions first, fallback to wallet if 0
+                let lifetimeWinnings = await calculateLifetimeWinnings(uid);
+                if (lifetimeWinnings === 0) {
+                    // Fallback to wallet winnings if no transactions found
+                    lifetimeWinnings = await getWinningsFromWallet(uid);
+                }
+                
+                lifetimeWinningsSpan.innerText = `₹${lifetimeWinnings.toLocaleString()}`;
+                
+                // Hide skeleton and show content
+                skeletonContainer.style.display = 'none';
+                mainContent.style.display = 'block';
+                
+            } catch (error) {
+                console.error('Error loading user data:', error);
+                
+                // Hide skeleton and show content even on error
+                skeletonContainer.style.display = 'none';
+                mainContent.style.display = 'block';
+                
+                // Set default values
+                usernameSpan.innerText = 'Player';
+                totalMatchesSpan.innerText = '0';
+                lifetimeWinningsSpan.innerText = '₹0';
+            }
+        }
+
+        // Logout function
+        function logoutUser() {
+            auth.signOut().then(() => {
+                window.location.href = 'login.html';
+            }).catch(error => {
+                console.error('Logout error:', error);
+                alert('Logout failed. Please try again.');
+            });
+        }
+
+        // ===== INITIALIZATION =====
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check authentication state
+            auth.onAuthStateChanged(user => {
+                if (user) {
+                    USER_UID = user.uid;
+                    loadUserData(USER_UID);
+                } else {
+                    // User not authenticated, redirect to login
+                    window.location.href = 'login.html';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

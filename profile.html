@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - ElitePros</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- Keep only auth and app (no database) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+    <!-- database script completely removed -->
+    
+    <style>
+        :root {
+            --bg-dark: #0b1020;
+            --card-bg: #1f2340;
+            --card-dark: #121322;
+            --accent: #3f3ef2;
+            --muted: #9aa3b2;
+            --primary-green: #4ade80;
+            --header-bg: #111827;
+            --wallet-bg: #1f2937;
+            --joined-color: #0d9488;
+        }
+        
+        body {
+            background: var(--bg-dark);
+            color: white;
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+        
+        /* Header - Updated */
+        .header-bar {
+            background: var(--header-bg);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        
+        .app-logo {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 2px solid rgba(99, 102, 241, 0.5);
+        }
+        
+        .header-title {
+            text-align: center;
+            flex: 1;
+            margin: 0 10px;
+            font-weight: 700;
+            font-size: 18px;
+            background: linear-gradient(135deg, #fff, #a5b4fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        /* Back Button */
+        .back-btn {
+            background: none;
+            border: none;
+            color: #9ca3af;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 8px;
+            border-radius: 10px;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .back-btn:hover {
+            color: #a5b4fc;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        /* Profile Info Cards - NEW LAYOUT */
+        .profile-info-container {
+            margin: 20px 16px;
+        }
+        
+        .profile-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+            border-radius: 16px;
+            padding: 16px;
+            border: 1.5px solid transparent;
+            margin-bottom: 12px;
+            transition: all 0.3s ease;
+            
+            /* Gradient border effect */
+            background: linear-gradient(135deg, var(--card-bg) 0%, var(--card-dark) 100%) padding-box,
+                        linear-gradient(135deg, rgba(63, 62, 242, 0.3), rgba(99, 102, 241, 0.2)) border-box;
+            box-shadow: 0 4px 20px rgba(2, 6, 23, 0.5);
+        }
+        
+        .profile-card:hover {
+            transform: translateY(-3px);
+            background: linear-gradient(135deg, rgba(31, 35, 64, 0.9), rgba(18, 19, 34, 0.9)) padding-box,
+                        linear-gradient(135deg, rgba(63, 62, 242, 0.5), rgba(99, 102, 241, 0.3)) border-box;
+            box-shadow: 0 8px 30px rgba(63, 62, 242, 0.25);
+        }
+        
+        .profile-card-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .profile-card-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+        }
+        
+        .profile-card-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+        
+        .profile-card-info {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .profile-card-label {
+            font-size: 12px;
+            color: #9ca3af;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+        
+        .profile-card-value {
+            font-size: 15px;
+            font-weight: 600;
+            color: #f3f4f6;
+            word-break: break-word;
+        }
+        
+        .profile-card-value.empty {
+            color: #6b7280;
+            font-style: italic;
+        }
+        
+        /* Edit Button - Only for Bio */
+        .edit-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #a5b4fc;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .edit-btn:hover {
+            background: rgba(99, 102, 241, 0.2);
+            color: white;
+            transform: scale(1.1);
+        }
+        
+        /* Different colors for profile icons */
+        .card-name .profile-card-icon {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+        }
+        
+        .card-username .profile-card-icon {
+            background: linear-gradient(135deg, #3f3ef2, #6366f1);
+        }
+        
+        .card-email .profile-card-icon {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+        
+        .card-phone .profile-card-icon {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+        
+        .card-bio .profile-card-icon {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+        }
+        
+        /* Edit Modal */
+        .edit-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(11, 16, 32, 0.95);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 20px;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        
+        .edit-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .edit-modal-content {
+            background: linear-gradient(135deg, #1a1f3a, #0f1328);
+            border-radius: 20px;
+            padding: 24px;
+            max-width: 400px;
+            width: 100%;
+            border: 2px solid rgba(63, 62, 242, 0.3);
+            box-shadow: 0 20px 60px rgba(63, 62, 242, 0.2);
+            transform: translateY(-20px);
+            transition: transform 0.3s ease;
+        }
+        
+        .edit-modal.active .edit-modal-content {
+            transform: translateY(0);
+        }
+        
+        .modal-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            text-align: center;
+            background: linear-gradient(135deg, #fff, #a5b4fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .modal-input {
+            width: 100%;
+            padding: 12px 14px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: white;
+            font-size: 15px;
+            margin-bottom: 8px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+        
+        .modal-input:focus {
+            outline: none;
+            border-color: #3f3ef2;
+            background: rgba(255, 255, 255, 0.08);
+        }
+        
+        .char-count {
+            text-align: right;
+            font-size: 12px;
+            color: #9ca3af;
+            margin-bottom: 20px;
+        }
+        
+        .char-count.warning {
+            color: #ef4444;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .modal-btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            font-family: inherit;
+        }
+        
+        .modal-cancel {
+            background: linear-gradient(135deg, #4b5563, #374151);
+            color: white;
+        }
+        
+        .modal-cancel:hover {
+            background: linear-gradient(135deg, #5b6575, #475161);
+            transform: translateY(-2px);
+        }
+        
+        .modal-save {
+            background: linear-gradient(135deg, #3f3ef2, #6366f1);
+            color: white;
+        }
+        
+        .modal-save:hover {
+            background: linear-gradient(135deg, #4f4eff, #7376ff);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(63, 62, 242, 0.4);
+        }
+        
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 14px;
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+            z-index: 3000;
+            opacity: 0;
+            animation: toastSlideIn 0.3s ease forwards, toastFadeOut 0.3s ease 2.7s forwards;
+        }
+        
+        @keyframes toastSlideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+        
+        @keyframes toastFadeOut {
+            from {
+                opacity: 1;
+            }
+            to {
+                opacity: 0;
+            }
+        }
+        
+        /* Loading Overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--bg-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 4000;
+        }
+        
+        .loading-logo {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 3px solid rgba(99, 102, 241, 0.3);
+            border-top-color: #3f3ef2;
+            animation: spin 1.5s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Skeleton Loading */
+        .skeleton-container {
+            margin: 20px 16px;
+        }
+        
+        .skeleton-card {
+            background: linear-gradient(135deg, #1f2340 0%, #121322 100%);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 1.5px solid rgba(255,255,255,0.1);
+        }
+        
+        .skeleton-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .skeleton-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+        }
+        
+        .skeleton-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .skeleton-info {
+            flex: 1;
+        }
+        
+        .skeleton-label {
+            height: 12px;
+            width: 60px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            margin-bottom: 6px;
+        }
+        
+        .skeleton-value {
+            height: 15px;
+            width: 120px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+        
+        .skeleton-shimmer {
+            background: linear-gradient(90deg, 
+                rgba(255, 255, 255, 0.05) 25%, 
+                rgba(255, 255, 255, 0.1) 50%, 
+                rgba(255, 255, 255, 0.05) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-logo"></div>
+    </div>
+
+    <!-- Header - Back button on left, app logo + label in center -->
+<header style="
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px;
+    background: #111827;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+">
+    <!-- Left: Back button -->
+    <button onclick="history.back()" style="
+        background: none;
+        border: none;
+        color: #9ca3af;
+        font-size: 20px;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+    ">
+        <i class="fa-solid fa-arrow-left"></i>
+    </button>
+
+    <!-- Center: App logo + Title -->
+    <div style="
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        justify-content: center;
+        flex: 1;
+    ">
+        <div style="
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 2px solid rgba(99, 102, 241, 0.5);
+        ">
+            <img src="http://elitepros.wuaze.com/IMG-20260106-WA0000.jpg" alt="ElitePros" style="width:100%;height:100%;object-fit:cover;">
+        </div>
+        <div style="
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: white;
+        ">
+            My Profile
+        </div>
+    </div>
+
+    <!-- Right: Profile icon -->
+    <i class="fa-solid fa-user" style="
+        color: #facc15;
+        font-size: 20px;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    "></i>
+</header>
+
+    <!-- Skeleton Loading -->
+    <div id="skeletonContainer" class="skeleton-container">
+        <div class="skeleton-card skeleton-shimmer">
+            <div class="skeleton-row">
+                <div class="skeleton-left">
+                    <div class="skeleton-icon"></div>
+                    <div class="skeleton-info">
+                        <div class="skeleton-label"></div>
+                        <div class="skeleton-value"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="skeleton-card skeleton-shimmer">
+            <div class="skeleton-row">
+                <div class="skeleton-left">
+                    <div class="skeleton-icon"></div>
+                    <div class="skeleton-info">
+                        <div class="skeleton-label"></div>
+                        <div class="skeleton-value"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="skeleton-card skeleton-shimmer">
+            <div class="skeleton-row">
+                <div class="skeleton-left">
+                    <div class="skeleton-icon"></div>
+                    <div class="skeleton-info">
+                        <div class="skeleton-label"></div>
+                        <div class="skeleton-value"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="skeleton-card skeleton-shimmer">
+            <div class="skeleton-row">
+                <div class="skeleton-left">
+                    <div class="skeleton-icon"></div>
+                    <div class="skeleton-info">
+                        <div class="skeleton-label"></div>
+                        <div class="skeleton-value"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="skeleton-card skeleton-shimmer">
+            <div class="skeleton-row">
+                <div class="skeleton-left">
+                    <div class="skeleton-icon"></div>
+                    <div class="skeleton-info">
+                        <div class="skeleton-label"></div>
+                        <div class="skeleton-value"></div>
+                    </div>
+                </div>
+                <div class="edit-btn" style="background: rgba(255, 255, 255, 0.1);">
+                    <i class="fa-solid fa-pencil"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Info Cards - NEW LAYOUT -->
+    <div id="profileContainer" class="profile-info-container" style="display: none;">
+        <!-- Name Card - Non-editable -->
+        <div class="profile-card card-name">
+            <div class="profile-card-row">
+                <div class="profile-card-left">
+                    <div class="profile-card-icon">
+                        <i class="fa-solid fa-id-card"></i>
+                    </div>
+                    <div class="profile-card-info">
+                        <div class="profile-card-label">Full Name</div>
+                        <div id="nameValue" class="profile-card-value empty">Loading...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Username Card - Non-editable -->
+        <div class="profile-card card-username">
+            <div class="profile-card-row">
+                <div class="profile-card-left">
+                    <div class="profile-card-icon">
+                        <i class="fa-solid fa-user"></i>
+                    </div>
+                    <div class="profile-card-info">
+                        <div class="profile-card-label">Username</div>
+                        <div id="usernameValue" class="profile-card-value">@username</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Email Card - Non-editable -->
+        <div class="profile-card card-email">
+            <div class="profile-card-row">
+                <div class="profile-card-left">
+                    <div class="profile-card-icon">
+                        <i class="fa-solid fa-envelope"></i>
+                    </div>
+                    <div class="profile-card-info">
+                        <div class="profile-card-label">Email Address</div>
+                        <div id="emailValue" class="profile-card-value empty">Loading...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Phone Card - Non-editable -->
+        <div class="profile-card card-phone">
+            <div class="profile-card-row">
+                <div class="profile-card-left">
+                    <div class="profile-card-icon">
+                        <i class="fa-solid fa-phone"></i>
+                    </div>
+                    <div class="profile-card-info">
+                        <div class="profile-card-label">Phone Number</div>
+                        <div id="phoneValue" class="profile-card-value empty">Loading...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Bio Card - Editable -->
+        <div class="profile-card card-bio">
+            <div class="profile-card-row">
+                <div class="profile-card-left">
+                    <div class="profile-card-icon">
+                        <i class="fa-solid fa-book"></i>
+                    </div>
+                    <div class="profile-card-info">
+                        <div class="profile-card-label">Bio</div>
+                        <div id="bioValue" class="profile-card-value empty">ElitePros On Top</div>
+                    </div>
+                </div>
+                <button class="edit-btn" onclick="editField('bio')">
+                    <i class="fa-solid fa-pencil"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="editModal" class="edit-modal">
+        <div class="edit-modal-content">
+            <h2 id="modalTitle" class="modal-title">Edit Bio</h2>
+            <input id="modalInput" type="text" class="modal-input" placeholder="Enter your bio (max 30 characters)" maxlength="30">
+            <div id="charCount" class="char-count">0/30</div>
+            <div class="modal-buttons">
+                <button onclick="closeModal()" class="modal-btn modal-cancel">Cancel</button>
+                <button onclick="saveEdit()" class="modal-btn modal-save">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== Firebase Config (only auth) =====
+        const firebaseConfig = {
+            apiKey: "AIzaSyC86fii3isDnSOof71h_18PdZehzCEFIFw",
+            authDomain: "eliteprosofficial.firebaseapp.com",
+            databaseURL: "https://eliteprosofficial-default-rtdb.firebaseio.com",
+            projectId: "eliteprosofficial",
+            storageBucket: "eliteprosofficial.firebasestorage.app",
+            messagingSenderId: "646561207100",
+            appId: "1:646561207100:web:47de7b648695367e208439",
+            measurementId: "G-ZN5VNFCSEL"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+
+        // DOM Elements
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const skeletonContainer = document.getElementById('skeletonContainer');
+        const profileContainer = document.getElementById('profileContainer');
+        const editModal = document.getElementById('editModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalInput = document.getElementById('modalInput');
+        const charCount = document.getElementById('charCount');
+        
+        // Profile Elements
+        const nameValue = document.getElementById('nameValue');
+        const usernameValue = document.getElementById('usernameValue');
+        const emailValue = document.getElementById('emailValue');
+        const phoneValue = document.getElementById('phoneValue');
+        const bioValue = document.getElementById('bioValue');
+
+        // Global Variables
+        let currentEditKey = null;
+        const API_BASE = 'https://elitepros-backend.onrender.com';
+
+        // Helper: get auth token
+        async function getAuthToken() {
+            const user = auth.currentUser;
+            if (!user) throw new Error('No authenticated user');
+            return user.getIdToken();
+        }
+
+        // Hide loading overlay and show skeleton
+        function showSkeleton() {
+            loadingOverlay.style.display = 'none';
+            skeletonContainer.style.display = 'block';
+            profileContainer.style.display = 'none';
+        }
+
+        // Hide skeleton and show profile data
+        function showProfile() {
+            skeletonContainer.style.display = 'none';
+            profileContainer.style.display = 'block';
+        }
+
+        // Show toast notification
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            // Remove toast after animation
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        // Fetch profile from backend
+        async function loadProfile() {
+            try {
+                const token = await getAuthToken();
+                const response = await fetch(`${API_BASE}/api/profile`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const data = await response.json();
+                // Expected: { name, username, email, phone, bio }
+                updateProfileUI(data);
+                showProfile();
+            } catch (error) {
+                console.error('Failed to load profile:', error);
+                // Set fallback values (empty / defaults)
+                updateProfileUI({
+                    name: '',
+                    username: '',
+                    email: '',
+                    phone: '',
+                    bio: ''
+                });
+                showProfile();
+                showToast('Could not load profile. Using defaults.');
+            }
+        }
+
+        // Update UI with profile data (truncation rules)
+        function updateProfileUI(data) {
+            // Name: max 15 chars
+            let name = data.name || 'Not set';
+            if (name.length > 15) name = name.substring(0, 15) + '...';
+            nameValue.innerText = name;
+            nameValue.className = data.name ? 'profile-card-value' : 'profile-card-value empty';
+
+            // Username
+            usernameValue.innerText = data.username ? `@${data.username}` : '@username';
+            usernameValue.className = 'profile-card-value';
+
+            // Email
+            emailValue.innerText = data.email || 'Not set';
+            emailValue.className = data.email ? 'profile-card-value' : 'profile-card-value empty';
+
+            // Phone
+            phoneValue.innerText = data.phone || 'Not set';
+            phoneValue.className = data.phone ? 'profile-card-value' : 'profile-card-value empty';
+
+            // Bio: default "ElitePros On Top", max 30 chars display
+            let bio = data.bio || 'ElitePros On Top';
+            if (bio.length > 30) bio = bio.substring(0, 30) + '...';
+            bioValue.innerText = bio;
+            bioValue.className = data.bio ? 'profile-card-value' : 'profile-card-value empty';
+        }
+
+        // Auth state change
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                showSkeleton();
+                await loadProfile();
+            } else {
+                window.location.href = 'login.html';
+            }
+        });
+
+        // Edit field function - Only for bio
+        function editField(fieldKey) {
+            currentEditKey = fieldKey;
+            modalTitle.innerText = 'Edit Bio';
+            
+            // Get current bio text from UI (may be truncated)
+            let currentValue = bioValue.innerText;
+            
+            // If it's the default placeholder, start empty
+            if (currentValue === 'ElitePros On Top' || currentValue === 'ElitePros On Top...') {
+                modalInput.value = '';
+            } else {
+                // Remove possible trailing ... – but we'll use the raw value stored in UI, it's okay
+                modalInput.value = currentValue.endsWith('...') ? currentValue.slice(0, -3) : currentValue;
+            }
+            
+            modalInput.placeholder = 'Enter your bio (max 30 characters)';
+            modalInput.maxLength = 30;
+            updateCharCount();
+            
+            editModal.classList.add('active');
+            modalInput.focus();
+        }
+
+        // Update character count
+        function updateCharCount() {
+            const length = modalInput.value.length;
+            charCount.textContent = `${length}/30`;
+            if (length >= 28) {
+                charCount.classList.add('warning');
+            } else {
+                charCount.classList.remove('warning');
+            }
+        }
+
+        // Close modal
+        function closeModal() {
+            editModal.classList.remove('active');
+            currentEditKey = null;
+            modalInput.value = '';
+            charCount.textContent = '0/30';
+            charCount.classList.remove('warning');
+        }
+
+        // Save edit (bio update via backend)
+        async function saveEdit() {
+            const newValue = modalInput.value.trim();
+            
+            if (!currentEditKey) {
+                closeModal();
+                return;
+            }
+            
+            // Frontend validation: max 30 chars
+            if (newValue.length > 30) {
+                showToast('Bio cannot exceed 30 characters!');
+                return;
+            }
+            
+            const user = auth.currentUser;
+            if (!user) {
+                showToast('You must be logged in');
+                closeModal();
+                return;
+            }
+            
+            try {
+                const token = await getAuthToken();
+                
+                const response = await fetch(`${API_BASE}/api/profile/update-bio`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ bio: newValue })
+                });
+                
+                if (!response.ok) {
+                    const errData = await response.json().catch(() => ({}));
+                    throw new Error(errData.message || 'Update failed');
+                }
+                
+                // Update UI optimistically (with truncation)
+                const displayBio = newValue || 'ElitePros On Top';
+                let truncated = displayBio;
+                if (truncated.length > 30) {
+                    truncated = truncated.substring(0, 30) + '...';
+                }
+                bioValue.innerText = truncated;
+                bioValue.className = newValue ? 'profile-card-value' : 'profile-card-value empty';
+                
+                showToast('Bio updated successfully!');
+                closeModal();
+            } catch (error) {
+                console.error('Update bio error:', error);
+                showToast('Failed to update bio. Please try again.');
+            }
+        }
+
+        // Close modal on background click
+        editModal.addEventListener('click', (e) => {
+            if (e.target === editModal) {
+                closeModal();
+            }
+        });
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && editModal.classList.contains('active')) {
+                closeModal();
+            }
+        });
+
+        // Update character count on input
+        modalInput.addEventListener('input', updateCharCount);
+
+        // Submit on Enter key in modal
+        modalInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                saveEdit();
+            }
+        });
+    </script>
+</body>
+</html>

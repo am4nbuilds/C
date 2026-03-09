@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Match Result</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" />
+<style>
+:root {
+  --bg-dark: #0b1020;
+  --card-bg: #1a1f36;
+  --card-dark: #121322;
+  --accent: #3f3ef2;
+  --muted: #9aa3b2;
+  --primary-green: #4ade80; 
+  --header-bg: #111827;
+  --wallet-bg: #1f2937;
+  --joined-color: #0d9488;
+  --leaderboard-bg: linear-gradient(135deg, #1a1f36 0%, #15192b 100%);
+  --row-bg: rgba(255,255,255,0.03);
+  --row-hover: rgba(255,255,255,0.08);
+}
+
+body { 
+  background: var(--bg-dark); 
+  color: #fff; 
+  font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+/* Enhanced Header */
+header { 
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center; 
+  padding: 14px 16px; 
+  background: var(--header-bg); 
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(10px);
+}
+
+.header-left, .header-center, .header-right { 
+  display: flex; 
+  align-items: center; 
+}
+
+.header-left { 
+  flex: 1; 
+}
+
+.header-center { 
+  flex: 2; 
+  justify-content: center; 
+  gap: 8px; 
+}
+
+.header-right { 
+  flex: 1; 
+  justify-content: flex-end; 
+}
+
+.back-btn { 
+  width: 44px; 
+  height: 44px; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  border-radius: 12px; 
+  background: rgba(255,255,255,0.05);
+  cursor: pointer; 
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.back-btn:hover {
+  background: rgba(255,255,255,0.1);
+  transform: translateY(-1px);
+}
+
+.header-center img { 
+  width: 40px; 
+  height: 40px; 
+  border-radius: 50%; 
+  border: 2px solid rgba(255,255,255,0.1);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.header-title { 
+  font-weight: 800; 
+  font-size: 18px;
+  letter-spacing: 0.5px;
+  background: linear-gradient(135deg, #fff, #a5b4fc);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.trophy-icon { 
+  width: 44px; 
+  height: 44px; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  border-radius: 12px; 
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  cursor: pointer; 
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.trophy-icon:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+}
+
+/* Enhanced Cards */
+.card { 
+  background: var(--leaderboard-bg); 
+  border-radius: 20px; 
+  padding: 0; 
+  margin: 16px; 
+  box-shadow: 0 10px 40px rgba(2,6,23,0.8);
+  border: 1px solid rgba(255,255,255,0.1);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 50px rgba(2,6,23,0.9);
+  border-color: rgba(63, 62, 242, 0.3);
+}
+
+.card-header { 
+  display: flex; 
+  align-items: center; 
+  gap: 12px; 
+  font-weight: 800; 
+  margin-bottom: 16px; 
+  font-size: 16px;
+  color: white;
+}
+
+.card-header i { 
+  font-size: 18px; 
+}
+
+.note-text { 
+  color: #cbd5e1; 
+  font-size: 14px; 
+  line-height: 1.5;
+}
+
+/* Enhanced Leaderboard */
+.leaderboard-container {
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.leaderboard-header, .leaderboard-row { 
+  display: grid;
+  grid-template-columns: 70px 1fr 120px 80px 60px;
+  align-items: center;
+  padding: 16px 20px;
+  gap: 15px;
+}
+
+.leaderboard-header { 
+  font-weight: 800; 
+  color: #cbd5e1; 
+  background: rgba(255,255,255,0.05);
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.col-pos { 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+}
+
+.col-name { 
+  display: flex; 
+  align-items: center; 
+  gap: 10px; 
+  font-weight: 600;
+}
+
+.col-winnings, .col-kills { 
+  display: flex; 
+  justify-content: center; 
+  align-items: center; 
+  gap: 6px; 
+  font-weight: 700; 
+}
+
+.col-winnings { 
+  color: #10b981; 
+}
+
+.col-kills { 
+  color: #f87171; 
+}
+
+.col-view { 
+  display: flex; 
+  justify-content: center; 
+  align-items: center; 
+}
+
+/* Position Badges */
+.pos-badge { 
+  width: 42px; 
+  height: 42px; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  border-radius: 12px; 
+  font-weight: 800; 
+  font-size: 14px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  transition: all 0.3s ease;
+}
+
+.pos-1 { 
+  background: linear-gradient(135deg, #ffd700, #ffed4e);
+  color: #111827; 
+  box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+}
+
+.pos-2 { 
+  background: linear-gradient(135deg, #c0c0c0, #e5e5e5);
+  color: #111827; 
+  box-shadow: 0 4px 15px rgba(192, 192, 192, 0.4);
+}
+
+.pos-3 { 
+  background: linear-gradient(135deg, #cd7f32, #e3964a);
+  color: white; 
+  box-shadow: 0 4px 15px rgba(205, 127, 50, 0.4);
+}
+
+.pos-other { 
+  background: rgba(255,255,255,0.08);
+  color: white; 
+  border: 1px solid rgba(255,255,255,0.15);
+}
+
+/* Enhanced Rows */
+.leaderboard-row { 
+  background: var(--row-bg);
+  border-bottom: 1px solid rgba(255,255,255,0.05); 
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.leaderboard-row:last-child { 
+  border-bottom: none; 
+}
+
+.leaderboard-row:hover { 
+  background: var(--row-hover); 
+  transform: translateX(5px);
+}
+
+.leaderboard-row:hover .pos-badge {
+  transform: scale(1.1);
+}
+
+/* Header icons spacing */
+.leaderboard-header i { 
+  margin-right: 6px; 
+}
+
+/* View Profile Icon */
+.view-profile i { 
+  color: #3b82f6; 
+  cursor: pointer; 
+  transition: all 0.3s ease;
+  font-size: 16px;
+  background: rgba(59, 130, 246, 0.1);
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.view-profile:hover i {
+  color: #60a5fa;
+  background: rgba(59, 130, 246, 0.2);
+  transform: scale(1.1);
+}
+
+/* Main Content */
+main { 
+  overflow-y: auto; 
+  max-height: calc(100vh - 140px); 
+  margin-bottom: 16px; 
+}
+
+/* Loading Animation */
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 150px;
+}
+
+.spinner {
+  border: 4px solid rgba(255, 255, 255, 0.1);
+  border-top: 4px solid var(--primary-green);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Match Notes Card */
+.notes-card {
+  background: var(--leaderboard-bg);
+  border-radius: 20px;
+  padding: 20px;
+  margin: 16px;
+  box-shadow: 0 10px 40px rgba(2,6,23,0.8);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #cbd5e1;
+}
+
+.empty-state i {
+  font-size: 48px;
+  margin-bottom: 16px;
+  color: #6b7280;
+}
+
+.empty-state h3 {
+  font-weight: 700;
+  margin-bottom: 8px;
+  font-size: 18px;
+}
+
+.empty-state p {
+  font-size: 14px;
+  max-width: 300px;
+  margin: 0 auto;
+  line-height: 1.5;
+}
+
+/* Error State */
+.error-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #ef4444;
+}
+
+.error-state i {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.error-state h3 {
+  font-weight: 700;
+  margin-bottom: 8px;
+  font-size: 18px;
+}
+
+.error-state p {
+  font-size: 14px;
+  max-width: 300px;
+  margin: 0 auto;
+  line-height: 1.5;
+}
+
+/* Top 3 Highlight Effects */
+.leaderboard-row:nth-child(2) { /* 1st place */
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.05), transparent);
+}
+
+.leaderboard-row:nth-child(3) { /* 2nd place */
+  background: linear-gradient(135deg, rgba(192, 192, 192, 0.05), transparent);
+}
+
+.leaderboard-row:nth-child(4) { /* 3rd place */
+  background: linear-gradient(135deg, rgba(205, 127, 50, 0.05), transparent);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 640px) {
+  .leaderboard-header, .leaderboard-row {
+    grid-template-columns: 50px 1fr 90px 60px 50px;
+    padding: 14px 15px;
+    gap: 10px;
+    font-size: 13px;
+  }
+  
+  .pos-badge {
+    width: 36px;
+    height: 36px;
+    font-size: 12px;
+    border-radius: 10px;
+  }
+  
+  .col-name {
+    gap: 8px;
+  }
+  
+  .view-profile i {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .leaderboard-header, .leaderboard-row {
+    grid-template-columns: 45px 1fr 80px 50px 45px;
+    padding: 12px 10px;
+    gap: 8px;
+    font-size: 12px;
+  }
+  
+  .pos-badge {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .col-name {
+    gap: 6px;
+  }
+  
+  .view-profile i {
+    width: 30px;
+    height: 30px;
+  }
+  
+  .header-title {
+    font-size: 16px;
+  }
+}
+
+/* Floating particles background effect */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: 
+    radial-gradient(circle at 20% 80%, rgba(63, 62, 242, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(16, 185, 129, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(245, 158, 11, 0.05) 0%, transparent 50%);
+  z-index: -1;
+}
+
+/* Glow effect for top cards */
+.glow-effect {
+  position: relative;
+}
+
+.glow-effect::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, #3f3ef2, #10b981, #f59e0b, #3f3ef2);
+  background-size: 400% 400%;
+  border-radius: 22px;
+  z-index: -1;
+  filter: blur(8px);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  animation: gradientShift 3s ease infinite;
+}
+
+.glow-effect:hover::after {
+  opacity: 0.6;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <button class="back-btn" onclick="goBack()" aria-label="Back">
+      <i class="fa fa-arrow-left text-xl"></i>
+    </button>
+  </div>
+  <div class="header-center">
+    <img src="https://i.ibb.co/Y7SksQy9/IMG-20250830-082315-071.jpg" alt="App Logo">
+    <div class="header-title">Match Results</div>
+  </div>
+  <div class="header-right">
+    <div class="trophy-icon">
+      <i class="fa-solid fa-trophy text-white"></i>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- Match Notes Section - Only show if notes exist -->
+  <div id="matchNotesContainer" class="notes-card" style="display: none;">
+    <div class="card-header"><i class="fa-solid fa-note-sticky text-yellow-400"></i> Match Notes</div>
+    <p id="matchNotes" class="note-text"></p>
+  </div>
+
+  <div class="card glow-effect">
+    <div class="leaderboard-header">
+      <div class="col-pos">RANK</div>
+      <div class="col-name">PLAYER</div>
+      <div class="col-winnings">WINNINGS</div>
+      <div class="col-kills">KILLS</div>
+      <div class="col-view">PROFILE</div>
+    </div>
+
+    <div id="leaderboard-rows">
+      <div class="loading-spinner">
+        <div class="spinner"></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
+  // Firebase Configuration
+  const firebaseConfig = {
+      apiKey: "AIzaSyC86fii3isDnSOof71h_18PdZehzCEFIFw",
+      authDomain: "eliteprosofficial.firebaseapp.com",
+      databaseURL: "https://eliteprosofficial-default-rtdb.firebaseio.com",
+      projectId: "eliteprosofficial",
+      storageBucket: "eliteprosofficial.firebasestorage.app",
+      messagingSenderId: "646561207100",
+      appId: "1:646561207100:web:47de7b648695367e208439",
+      measurementId: "G-ZN5VNFCSEL"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.database();
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const matchId = urlParams.get('matchId');
+
+  function goBack() {
+    if(document.referrer) window.history.back();
+    else window.location.href='tournaments.html'; 
+  }
+
+  /**
+   * Fetches match details and results to build the leaderboard dynamically.
+   */
+  async function loadMatchResults(matchId) {
+      const leaderboardContainer = document.getElementById('leaderboard-rows');
+      const notesElement = document.getElementById('matchNotes');
+      const notesContainer = document.getElementById('matchNotesContainer');
+      
+      leaderboardContainer.innerHTML = '<div class="loading-spinner"><div class="spinner"></div></div>';
+      notesElement.textContent = 'Fetching match details...';
+
+      // 1. Fetch match data (details, prize structure, and results)
+      const matchSnap = await db.ref('matches/' + matchId).once('value');
+      const matchData = matchSnap.val();
+      
+      if (!matchData || matchData.status !== 'completed' || !matchData.results) {
+          leaderboardContainer.innerHTML = `
+            <div class="empty-state">
+              <i class="fa-solid fa-trophy"></i>
+              <h3>Results Not Available</h3>
+              <p>Match results are not yet finalized or match not found.</p>
+            </div>`;
+          notesElement.textContent = `Match: ${matchData?.name || 'Unknown'}. Status: Results pending.`;
+          return;
+      }
+      
+      const placements = matchData.results.placements || {};
+      const kills = matchData.results.kills || {};
+      const rankPrizes = matchData.results.rankPrizes || {};
+      const totalWinnings = matchData.results.totalWinnings || {};
+      const perKillPrize = parseFloat(matchData.perKill || 0);
+      
+      // Handle match notes - only show if notes exist
+      const matchNotes = matchData.results.matchNotes;
+      if (matchNotes && matchNotes.trim() !== '') {
+          notesContainer.style.display = 'block';
+          notesElement.innerHTML = matchNotes;
+      } else {
+          notesContainer.style.display = 'none';
+      }
+
+      // --- Build a combined results map (UID -> Data) ---
+      const resultsMap = {};
+      const allUids = new Set([
+          ...Object.values(placements), 
+          ...Object.keys(kills),
+          ...Object.keys(rankPrizes),
+          ...Object.keys(totalWinnings)
+      ]);
+
+      // Initialize map with placement data
+      Object.keys(placements).forEach(rank => {
+          const uid = placements[rank];
+          const position = parseInt(rank.replace(/[^\d]/g, ''));
+          const rankPrize = parseFloat(rankPrizes[uid] || 0);
+          const killCount = kills[uid] || 0;
+          const killWinnings = killCount * perKillPrize;
+          const playerTotalWinnings = parseFloat(totalWinnings[uid] || (rankPrize + killWinnings));
+          
+          resultsMap[uid] = { 
+              uid, 
+              position, 
+              rank: rank, 
+              rankWinnings: rankPrize, 
+              kills: killCount,
+              killWinnings: killWinnings,
+              totalWinnings: playerTotalWinnings
+          };
+      });
+
+      // Add players who have kills but no placement
+      Object.keys(kills).forEach(uid => {
+          if (!resultsMap[uid]) {
+              const killCount = kills[uid] || 0;
+              const killWinnings = killCount * perKillPrize;
+              const rankPrize = parseFloat(rankPrizes[uid] || 0);
+              const playerTotalWinnings = parseFloat(totalWinnings[uid] || (rankPrize + killWinnings));
+              
+              resultsMap[uid] = { 
+                  uid, 
+                  position: 999, 
+                  rank: 'N/A', 
+                  rankWinnings: rankPrize, 
+                  kills: killCount,
+                  killWinnings: killWinnings,
+                  totalWinnings: playerTotalWinnings
+              };
+          }
+      });
+
+      // Add players who have rank prizes but no placement or kills
+      Object.keys(rankPrizes).forEach(uid => {
+          if (!resultsMap[uid]) {
+              const rankPrize = parseFloat(rankPrizes[uid] || 0);
+              const killCount = kills[uid] || 0;
+              const killWinnings = killCount * perKillPrize;
+              const playerTotalWinnings = parseFloat(totalWinnings[uid] || (rankPrize + killWinnings));
+              
+              resultsMap[uid] = { 
+                  uid, 
+                  position: 999, 
+                  rank: 'N/A', 
+                  rankWinnings: rankPrize, 
+                  kills: killCount,
+                  killWinnings: killWinnings,
+                  totalWinnings: playerTotalWinnings
+              };
+          }
+      });
+
+      // --- Fetch User IGNs ---
+      const uidPromises = Array.from(allUids).map(uid => 
+          db.ref(`users/${uid}/ign`).once('value').then(snap => ({
+              uid,
+              ign: snap.val() || 'Unknown Player'
+          }))
+      );
+      
+      const userIgns = await Promise.all(uidPromises);
+      userIgns.forEach(u => {
+          if (resultsMap[u.uid]) {
+              resultsMap[u.uid].ign = u.ign;
+          }
+      });
+      
+      // --- Final Render List ---
+      let finalLeaderboard = Object.values(resultsMap);
+      
+      // Sort: 1st by Position (1, 2, 3), then by Total Winnings (highest first)
+      finalLeaderboard.sort((a, b) => {
+          if (a.position !== b.position) {
+              return a.position - b.position;
+          }
+          return b.totalWinnings - a.totalWinnings;
+      });
+
+      // Render rows
+      if (finalLeaderboard.length === 0) {
+        leaderboardContainer.innerHTML = `
+          <div class="empty-state">
+            <i class="fa-solid fa-users"></i>
+            <h3>No Players Found</h3>
+            <p>No player data available for this match.</p>
+          </div>`;
+        return;
+      }
+
+      leaderboardContainer.innerHTML = '';
+      finalLeaderboard.forEach((player, index) => {
+          const pos = player.position <= 3 ? player.position : index + 1; 
+          const posClass = pos === 1 ? 'pos-1' : pos === 2 ? 'pos-2' : pos === 3 ? 'pos-3' : 'pos-other';
+          
+          const totalWinnings = parseFloat(player.totalWinnings || 0);
+          const winningsText = totalWinnings > 0 ? `₹${totalWinnings.toFixed(0).toLocaleString()}` : '₹0';
+          
+          leaderboardContainer.innerHTML += `
+          <div class="leaderboard-row">
+            <div class="col-pos"><div class="pos-badge ${posClass}">${pos}</div></div>
+            <div class="col-name">${player.ign || 'Unknown Player'}</div>
+            <div class="col-winnings">${winningsText}</div>
+            <div class="col-kills">${player.kills}</div>
+            <div class="col-view view-profile"><a href="view-profile.html?uid=${player.uid}"><i class="fa-solid fa-eye"></i></a></div>
+          </div>`;
+      });
+  }
+
+  // Check for authenticated user and match ID
+  auth.onAuthStateChanged(user => {
+    if (!user) {
+        window.location.href = 'home.html';
+        return;
+    }
+    
+    if (!matchId) {
+        document.getElementById('leaderboard-rows').innerHTML = `
+          <div class="error-state">
+            <i class="fa-solid fa-exclamation-triangle"></i>
+            <h3>Match ID Missing</h3>
+            <p>Match ID is missing from the URL. Please return to the Tournaments page.</p>
+          </div>`;
+        setTimeout(goBack, 3000); 
+        return;
+    }
+
+    loadMatchResults(matchId).catch(error => {
+        console.error("Failed to load match results:", error);
+        document.getElementById('leaderboard-rows').innerHTML = `
+          <div class="error-state">
+            <i class="fa-solid fa-exclamation-triangle"></i>
+            <h3>Error Loading Results</h3>
+            <p>Failed to load match results. Please try again.</p>
+          </div>`;
+    });
+  });
+</script>
+
+</body>
+</html>

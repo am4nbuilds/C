@@ -1,0 +1,1531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ElitePros - Register</title>
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+
+<script>
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+</script>
+<script src="https://cdn.tailwindcss.com"></script>
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
+  crossorigin="anonymous"
+/>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    background: #0b1020;
+    font-family: "Inter", sans-serif;
+    color: white;
+    min-height: 100vh;
+  }
+
+  /* Header - Matching referral page */
+  .app-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    background: #111827;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    position: relative;
+  }
+
+  .header-btn {
+    background: transparent;
+    border: none;
+    color: #d1d5db;
+    font-size: 1.25rem;
+    cursor: pointer;
+    transition: color 0.2s;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+  }
+
+  .header-btn:hover {
+    color: white;
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .header-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+  }
+
+  .logo-img {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: 1px solid #374151;
+    object-fit: cover;
+  }
+
+  .header-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: white;
+  }
+
+  .register-container {
+    background: #0b1020;
+    padding: 1.5rem 1rem;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    padding-top: 0.5rem;
+  }
+
+  .title {
+    font-size: 2rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, #fff 0%, #a5b4fc 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: 1px;
+    margin-bottom: 0.5rem;
+  }
+
+  .subtitle {
+    color: #cbd5e1;
+    font-size: 0.95rem;
+    font-weight: 500;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  @media (min-width: 768px) {
+    .form-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+    .full-width {
+      grid-column: 1 / -1;
+    }
+  }
+
+  .input-wrapper {
+    position: relative;
+    margin-bottom: 0.5rem;
+  }
+
+  .input-field {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+    padding: 1.1rem 1rem 1.1rem 3rem;
+    color: white;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+  }
+
+  .input-field::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+    font-weight: 400;
+  }
+
+  .input-field:focus {
+    outline: none;
+    border-color: #3f3ef2;
+    box-shadow: 0 0 0 2px rgba(63, 62, 242, 0.25);
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  /* Field states - only show after interaction */
+  .input-field.error {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
+  }
+
+  .input-field.success {
+    border-color: #10b981;
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+  }
+
+  /* Icon inside input */
+  .input-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 1.1rem;
+    transition: color 0.3s ease;
+  }
+
+  .input-field:focus + .input-icon {
+    color: #a5b4fc;
+  }
+
+  .input-field.success + .input-icon {
+    color: #10b981;
+  }
+
+  .input-field.error + .input-icon {
+    color: #ef4444;
+  }
+
+  .password-wrapper {
+    position: relative;
+  }
+
+  .toggle-password {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: rgba(165, 180, 252, 0.7);
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: color 0.2s;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+  }
+
+  .toggle-password:hover {
+    color: #a5b4fc;
+  }
+
+  .phone-input {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+  }
+
+  .country-code {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+    padding: 1.1rem 1rem;
+    color: #a5b4fc;
+    font-weight: 600;
+    min-width: 85px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    font-family: "Inter", sans-serif;
+  }
+
+  .referral-section {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    padding: 1.2rem;
+    margin: 1.2rem 0 1rem 0;
+  }
+
+  .referral-title {
+    color: #a5b4fc;
+    font-size: 1rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.8rem;
+  }
+
+  .referral-title i {
+    font-size: 1.1rem;
+  }
+
+  .register-btn {
+    background: linear-gradient(135deg, #facc15, #eab308);
+    color: #0b1020;
+    font-family: "Inter", sans-serif;
+    font-weight: 700;
+    border-radius: 12px;
+    padding: 1rem;
+    width: 100%;
+    box-shadow: 0 4px 15px rgba(250, 204, 21, 0.3);
+    transition: all 0.3s ease;
+    border: none;
+    font-size: 1rem;
+    margin-top: 1rem;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .register-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #eab308, #ca8a04);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(250, 204, 21, 0.4);
+  }
+
+  .register-btn:disabled {
+    background: #374151;
+    color: #9ca3af;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  .register-btn:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 4px 15px rgba(250, 204, 21, 0.3);
+  }
+
+  .terms {
+    text-align: center;
+    margin-top: 1.5rem;
+    padding: 0 0.5rem;
+    color: #9ca3af;
+    font-size: 0.85rem;
+    line-height: 1.5;
+  }
+
+  .terms a {
+    color: #a5b4fc;
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  .terms a:hover {
+    text-decoration: underline;
+  }
+
+  .toast {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: #1f2937;
+    color: white;
+    padding: 1rem 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.9);
+    display: none;
+    font-weight: 600;
+    z-index: 1000;
+    max-width: 90%;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    opacity: 0;
+    transition: transform 0.4s ease, opacity 0.4s ease;
+  }
+
+  .toast.show {
+    display: block;
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  .toast.error {
+    background: #dc2626;
+  }
+
+  .toast.success {
+    background: #059669;
+  }
+
+  .loading {
+    display: inline-block;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(5px);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .modal-content {
+    background: #1f2937;
+    padding: 0;
+    border-radius: 16px;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+    animation: slideUp 0.4s ease;
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .modal-header {
+    background: rgba(63, 62, 242, 0.1);
+    padding: 1.25rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .modal-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: white;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+  }
+
+  .modal-title i {
+    font-size: 1.5rem;
+  }
+
+  .modal-body {
+    padding: 1.5rem;
+    color: #e2e8f0;
+    font-size: 1rem;
+    line-height: 1.6;
+    text-align: center;
+  }
+
+  .modal-footer {
+    padding: 0 1.5rem 1.5rem;
+    text-align: center;
+  }
+
+  .modal-btn {
+    background: #3f3ef2;
+    color: white;
+    border: none;
+    padding: 0.75rem 2rem;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(63, 62, 242, 0.3);
+    width: 100%;
+    max-width: 200px;
+  }
+
+  .modal-btn:hover {
+    background: #6366f1;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(63, 62, 242, 0.4);
+  }
+
+  .modal-btn:active {
+    transform: translateY(0);
+  }
+
+  .error-modal .modal-header {
+    background: rgba(239, 68, 68, 0.1);
+  }
+
+  .error-modal .modal-title {
+    color: #fca5a5;
+  }
+
+  .error-modal .modal-btn {
+    background: #ef4444;
+    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+  }
+
+  .error-modal .modal-btn:hover {
+    background: #dc2626;
+    box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+  }
+
+  /* Bonus info styles */
+  .bonus-info {
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #10b981;
+  }
+
+  .bonus-info i {
+    font-size: 1rem;
+  }
+</style>
+</head>
+<body>
+  <!-- Header - Matching Referral Page -->
+  <header class="app-header">
+    <button onclick="window.location.href='login.html'" class="header-btn">
+      <i class="fa-solid fa-arrow-left"></i>
+    </button>
+    
+    <div class="header-logo">
+      <img
+        src="https://i.ibb.co/Y7SksQy9/IMG-20250830-082315-071.jpg"
+        class="logo-img"
+        alt="ElitePros Logo"
+      />
+      <h1 class="header-title">Register</h1>
+    </div>
+    
+    <button onclick="window.location.href='login.html'" class="header-btn">
+      <i class="fa-solid fa-user-plus text-blue-400"></i>
+    </button>
+  </header>
+
+  <div class="register-container">
+    <!-- Header -->
+    <div class="header">
+      <h1 class="title">Create Account</h1>
+      <p class="subtitle">Join the elite gaming community</p>
+    </div>
+
+    <!-- Registration Form -->
+    <form id="registerForm">
+      <div class="form-grid">
+        <!-- Full Name -->
+        <div class="input-wrapper">
+          <input
+            type="text"
+            id="name"
+            class="input-field"
+            placeholder="Full Name"
+            autocomplete="name"
+          />
+          <div class="input-icon">
+            <i class="fa-solid fa-user"></i>
+          </div>
+        </div>
+
+        <!-- Username -->
+        <div class="input-wrapper">
+          <input
+            type="text"
+            id="username"
+            class="input-field"
+            placeholder="Username"
+            autocomplete="username"
+          />
+          <div class="input-icon">
+            <i class="fa-solid fa-at"></i>
+          </div>
+        </div>
+
+        <!-- Phone Number -->
+        <div class="input-wrapper full-width">
+          <div class="phone-input">
+            <div class="country-code">+91</div>
+            <input
+              type="tel"
+              id="phone"
+              class="input-field"
+              placeholder="Phone Number"
+              maxlength="10"
+              inputmode="numeric"
+              autocomplete="tel"
+            />
+            <div class="input-icon" style="left: calc(85px + 1rem);">
+              <i class="fa-solid fa-phone"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Email -->
+        <div class="input-wrapper full-width">
+          <input
+            type="email"
+            id="email"
+            class="input-field"
+            placeholder="Email Address"
+            autocomplete="email"
+          />
+          <div class="input-icon">
+            <i class="fa-solid fa-envelope"></i>
+          </div>
+        </div>
+
+        <!-- Password -->
+        <div class="input-wrapper full-width">
+          <div class="password-wrapper">
+            <input
+              type="password"
+              id="password"
+              class="input-field"
+              placeholder="Password (Min 6 characters)"
+              autocomplete="new-password"
+            />
+            <div class="input-icon">
+              <i class="fa-solid fa-lock"></i>
+            </div>
+            <button type="button" class="toggle-password" id="togglePassword">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Referral Section -->
+      <div class="referral-section">
+        <div class="referral-title">
+          <i class="fa-solid fa-gift"></i>
+          Referral Code (Optional)
+        </div>
+        <div class="input-wrapper">
+          <input
+            type="text"
+            id="referral"
+            class="input-field"
+            placeholder="Enter referral code (e.g., ABC123)"
+            maxlength="6"
+          />
+          <div class="input-icon">
+            <i class="fa-solid fa-gift"></i>
+          </div>
+        </div>
+        
+        <!-- Bonus Information (hidden by default) -->
+        <div id="bonusInfo" class="bonus-info" style="display: none;">
+          <i class="fa-solid fa-coins"></i>
+          <span id="bonusText"></span>
+        </div>
+      </div>
+
+      <!-- Register Button -->
+      <button type="button" id="registerBtn" class="register-btn" disabled>
+        Create Account
+      </button>
+
+      <!-- Terms and Conditions -->
+      <div class="terms">
+        By registering, I agree to ElitePros 
+        <a href="#" onclick="alert('Terms & Conditions page would open here'); return false;">Terms & Conditions</a> 
+        and 
+        <a href="#" onclick="alert('Privacy Policy page would open here'); return false;">Privacy Policy</a>
+      </div>
+    </form>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast"></div>
+
+  <!-- Improved Modal for Error Messages -->
+  <div id="errorModal" class="modal">
+    <div class="modal-content error-modal">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <i class="fa-solid fa-exclamation-circle"></i>
+          Error
+        </h3>
+      </div>
+      <div class="modal-body" id="modalMessage">
+        <!-- Error message will appear here -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="modal-btn" id="modalOkBtn">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script>
+    // Firebase Configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyC86fii3isDnSOof71h_18PdZehzCEFIFw",
+      authDomain: "eliteprosofficial.firebaseapp.com",
+      databaseURL: "https://eliteprosofficial-default-rtdb.firebaseio.com",
+      projectId: "eliteprosofficial",
+      storageBucket: "eliteprosofficial.firebasestorage.app",
+      messagingSenderId: "646561207100",
+      appId: "1:646561207100:web:47de7b648695367e208439",
+      measurementId: "G-ZN5VNFCSEL",
+    };
+
+    // Initialize Firebase
+    console.log("Initializing Firebase...");
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.database();
+    console.log("Firebase initialized successfully");
+
+    // DOM Elements
+    const nameInput = document.getElementById("name");
+    const usernameInput = document.getElementById("username");
+    const phoneInput = document.getElementById("phone");
+    const emailInput = document.getElementById("email");
+    const passwordInput = document.getElementById("password");
+    const referralInput = document.getElementById("referral");
+    const registerBtn = document.getElementById("registerBtn");
+    const toast = document.getElementById("toast");
+    const errorModal = document.getElementById("errorModal");
+    const modalMessage = document.getElementById("modalMessage");
+    const modalOkBtn = document.getElementById("modalOkBtn");
+    const bonusInfo = document.getElementById("bonusInfo");
+    const bonusText = document.getElementById("bonusText");
+
+    // App settings from Firebase
+    let appSettings = {
+      newUserBonus: 0, // Default value
+      referrerBonus: 0 // Default value
+    };
+
+    // Load app settings from Firebase
+    async function loadAppSettings() {
+  try {
+    console.log("Loading app settings from Firebase...");
+    const settingsRef = db.ref("settings");
+    const snapshot = await settingsRef.once("value");
+    
+    if (snapshot.exists()) {
+      appSettings = snapshot.val();
+      console.log("App settings loaded:", appSettings);
+      
+      // Set default values if they don't exist
+      if (typeof appSettings.newUserBonus === 'undefined') {
+        appSettings.newUserBonus = 0;
+      }
+      if (typeof appSettings.referrerBonus === 'undefined') {
+        appSettings.referrerBonus = 0;
+      }
+    } else {
+      console.warn("No settings found in Firebase. Using defaults.");
+      // Set default values
+      appSettings = {
+        newUserBonus: 0,
+        referrerBonus: 0
+      };
+    }
+  } catch (error) {
+    console.error("Error loading app settings:", error);
+    // Fallback to defaults
+    appSettings = {
+      newUserBonus: 0,
+      referrerBonus: 0
+    };
+  }
+}
+    // Call this function on page load
+    loadAppSettings();
+
+    // State
+    let errors = {};
+    let fieldInteracted = {
+      name: false,
+      username: false,
+      phone: false,
+      email: false,
+      password: false,
+    };
+    
+    // NEW: Flag to prevent validation after successful registration
+    let registrationComplete = false;
+
+    // Show toast message
+    function showToast(message, type = "success", duration = 3000) {
+      toast.textContent = message;
+      toast.className = `toast ${type}`;
+      toast.classList.add("show");
+
+      setTimeout(() => {
+        toast.classList.remove("show");
+      }, duration);
+    }
+
+    // Show error modal with improved styling
+    function showErrorModal(message, type = "error") {
+      modalMessage.textContent = message;
+      errorModal.className = `modal ${type}-modal`;
+      errorModal.style.display = "flex";
+    }
+
+    // Hide error modal
+    function hideErrorModal() {
+      errorModal.style.display = "none";
+    }
+
+    // Validation functions
+    const validations = {
+      name: (value) => {
+        if (!value.trim()) return "Full name is required";
+        if (value.trim().length < 2) return "Name must be at least 2 characters";
+        if (!/^[a-zA-Z\s.'-]+$/.test(value.trim()))
+          return "Name can only contain letters, spaces, and basic punctuation";
+        return null;
+      },
+
+      username: (value) => {
+        if (!value.trim()) return "Username is required";
+        if (value.trim().length < 1) return "Username must be at least 1 character";
+        if (!/^[a-zA-Z0-9_]+$/.test(value))
+          return "Only letters, numbers and underscore allowed";
+        if (/[^\x00-\x7F]/.test(value))
+          return "Username cannot contain special characters";
+        return null;
+      },
+
+      phone: (value) => {
+        if (!value.trim()) return "Phone number is required";
+        if (!/^\d{10}$/.test(value)) return "Phone number must be 10 digits";
+        if (!/^[6-9]/.test(value)) return "Phone number must start with 6-9";
+        return null;
+      },
+
+      email: (value) => {
+        if (!value.trim()) return "Email is required";
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value))
+          return "Please enter a valid email";
+        return null;
+      },
+
+      password: (value) => {
+        if (!value) return "Password is required";
+        if (value.length < 6) return "Password must be at least 6 characters";
+        return null;
+      },
+    };
+
+    // Show bonus information when referral code is valid
+    function showBonusInfo(isValid, referredByUsername = "") {
+      if (isValid) {
+        const newUserBonus = appSettings.newUserBonus || 0;
+        const referrerBonus = appSettings.referrerBonus || 0;
+        
+        if (newUserBonus > 0 || referrerBonus > 0) {
+          let bonusMessage = "";
+          
+          if (newUserBonus > 0) {
+            bonusMessage += `You get ₹${newUserBonus} bonus`;
+          }
+          
+          if (referrerBonus > 0 && referredByUsername) {
+            if (bonusMessage) bonusMessage += " and ";
+            bonusMessage += `${referredByUsername} gets ₹${referrerBonus} bonus`;
+          } else if (referrerBonus > 0) {
+            if (bonusMessage) bonusMessage += " and ";
+            bonusMessage += `Referrer gets ₹${referrerBonus} bonus`;
+          }
+          
+          bonusText.textContent = bonusMessage;
+          bonusInfo.style.display = "flex";
+        } else {
+          bonusInfo.style.display = "none";
+        }
+      } else {
+        bonusInfo.style.display = "none";
+      }
+    }
+
+    // Synchronous duplicate check for registration
+    async function checkDuplicateBeforeRegistration(field, value) {
+      if (!value.trim()) {
+        console.log(`Skipping duplicate check for empty ${field}`);
+        return false;
+      }
+
+      console.log(`Final duplicate check for ${field}: ${value}`);
+
+      try {
+        const usersRef = db.ref("users");
+        let snapshot;
+
+        if (field === "username") {
+          snapshot = await usersRef
+            .orderByChild("username")
+            .equalTo(value)
+            .once("value");
+        } else if (field === "email") {
+          snapshot = await usersRef
+            .orderByChild("email")
+            .equalTo(value)
+            .once("value");
+        } else if (field === "phone") {
+          snapshot = await usersRef
+            .orderByChild("phone")
+            .equalTo(value)
+            .once("value");
+        } else {
+          return false;
+        }
+
+        return snapshot.exists();
+      } catch (error) {
+        console.error(`Error in final duplicate check for ${field}:`, error);
+        return false;
+      }
+    }
+
+    // Check duplicate in database - for real-time validation
+    async function checkDuplicate(field, value) {
+      if (!value.trim()) {
+        console.log(`Skipping duplicate check for empty ${field}`);
+        return false;
+      }
+
+      console.log(`Real-time checking duplicate ${field}: ${value}`);
+
+      try {
+        const usersRef = db.ref("users");
+        let snapshot;
+
+        if (field === "username") {
+          snapshot = await usersRef
+            .orderByChild("username")
+            .equalTo(value)
+            .once("value");
+        } else if (field === "email") {
+          snapshot = await usersRef
+            .orderByChild("email")
+            .equalTo(value)
+            .once("value");
+        } else if (field === "phone") {
+          snapshot = await usersRef
+            .orderByChild("phone")
+            .equalTo(value)
+            .once("value");
+        } else {
+          return false;
+        }
+
+        if (snapshot.exists()) {
+          console.log(`Duplicate found for ${field}: ${value}`);
+          return true;
+        }
+
+        console.log(`No duplicate found for ${field}: ${value}`);
+        return false;
+      } catch (error) {
+        console.error(`Error checking duplicate ${field}:`, error);
+        return false;
+      }
+    }
+
+    // Validate referral code
+    async function validateReferralCode(code) {
+      console.log(`Validating referral code: ${code}`);
+
+      if (!code.trim()) {
+        showBonusInfo(false);
+        return { valid: false, message: "" };
+      }
+
+      const formatRegex = /^[A-Z]{3}\d{3}$/;
+      if (!formatRegex.test(code)) {
+        showBonusInfo(false);
+        return {
+          valid: false,
+          message:
+            "Invalid format. Must be 3 letters followed by 3 numbers (e.g., ABC123)",
+        };
+      }
+
+      const RESERVED_CODES = [
+        "ADM001",
+        "ADM002",
+        "EPR000",
+        "SYS001",
+        "ADM999",
+        "OWN001",
+      ];
+      if (RESERVED_CODES.includes(code)) {
+        showBonusInfo(false);
+        return { valid: false, message: "This is a reserved referral code" };
+      }
+
+      try {
+        const snapshot = await db.ref("referralCodes/" + code).once("value");
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          console.log("Referral code found:", data);
+          
+          // Show bonus information
+          showBonusInfo(true, data.username || "User");
+          
+          return {
+            valid: true,
+            data: data,
+            message: `Valid code! Referred by: ${data.username || "User"}`,
+          };
+        } else {
+          console.log("Referral code not found");
+          showBonusInfo(false);
+          return { valid: false, message: "Referral code does not exist" };
+        }
+      } catch (error) {
+        console.error("Error checking referral code:", error);
+        showBonusInfo(false);
+        return {
+          valid: false,
+          message: "Error checking code. Please try again.",
+        };
+      }
+    }
+
+    // Validate single field
+    async function validateField(field, value) {
+      // Don't validate if registration is complete
+      if (registrationComplete) {
+        console.log(`Skipping validation for ${field} (registration complete)`);
+        return true;
+      }
+      
+      console.log(`Validating field: ${field}, value: "${value}"`);
+
+      // Basic validation
+      const error = validations[field] ? validations[field](value) : null;
+
+      if (error) {
+        errors[field] = error;
+        return false;
+      }
+
+      // Only check duplicates if field has been interacted with and value is not empty
+      if (fieldInteracted[field] && value.trim() && field !== "name") {
+        try {
+          const isDuplicate = await checkDuplicate(field, value.trim());
+          if (isDuplicate) {
+            let fieldName = field;
+            if (field === "username") fieldName = "Username";
+            else if (field === "email") fieldName = "Email";
+            else if (field === "phone") fieldName = "Phone number";
+
+            errors[field] = `${fieldName} already exists`;
+            return false;
+          }
+        } catch (error) {
+          console.error(`Error in duplicate check for ${field}:`, error);
+          // Don't fail validation if duplicate check fails, just log it
+        }
+      }
+
+      // Clear error if validation passes
+      delete errors[field];
+      return true;
+    }
+
+    // Validate all fields
+    async function validateForm() {
+      // Don't validate if registration is complete
+      if (registrationComplete) {
+        console.log("Skipping form validation (registration complete)");
+        return true;
+      }
+      
+      console.log("Validating form...");
+
+      // Clear previous errors
+      const previousErrors = { ...errors };
+      errors = {};
+
+      // Validate each field
+      const fields = [
+        "name",
+        "username",
+        "phone",
+        "email",
+        "password",
+      ];
+
+      for (const field of fields) {
+        const input = document.getElementById(field);
+        const value = input ? input.value.trim() : "";
+        await validateField(field, value);
+      }
+
+      console.log("Current errors:", errors);
+
+      // Update UI only for interacted fields
+      updateFieldStatus();
+
+      return Object.keys(errors).length === 0;
+    }
+
+    // Final validation before registration with duplicate checks
+    async function finalValidationBeforeRegistration() {
+      console.log("=== FINAL VALIDATION BEFORE REGISTRATION ===");
+      
+      // Clear previous errors
+      errors = {};
+      
+      const fieldsToCheck = [
+        { field: "username", value: usernameInput.value.trim() },
+        { field: "email", value: emailInput.value.trim() },
+        { field: "phone", value: phoneInput.value.trim() }
+      ];
+      
+      // Check basic validations first
+      for (const { field, value } of fieldsToCheck) {
+        const error = validations[field] ? validations[field](value) : null;
+        if (error) {
+          errors[field] = error;
+        }
+      }
+      
+      // Check duplicates synchronously for all fields
+      for (const { field, value } of fieldsToCheck) {
+        if (!errors[field] && value) {
+          const isDuplicate = await checkDuplicateBeforeRegistration(field, value);
+          if (isDuplicate) {
+            let fieldName = field;
+            if (field === "username") fieldName = "Username";
+            else if (field === "email") fieldName = "Email";
+            else if (field === "phone") fieldName = "Phone number";
+            
+            errors[field] = `${fieldName} already exists`;
+          }
+        }
+      }
+      
+      // Also check other fields
+      const otherFields = ["name", "password"];
+      for (const field of otherFields) {
+        const input = document.getElementById(field);
+        const value = input ? input.value.trim() : "";
+        const error = validations[field] ? validations[field](value) : null;
+        if (error) {
+          errors[field] = error;
+        }
+      }
+      
+      console.log("Final validation errors:", errors);
+      return Object.keys(errors).length === 0;
+    }
+
+    // Update field status (only show after interaction)
+    function updateFieldStatus() {
+      // Don't update field status if registration is complete
+      if (registrationComplete) {
+        console.log("Skipping field status update (registration complete)");
+        return;
+      }
+      
+      const fields = [
+        "name",
+        "username",
+        "phone",
+        "email",
+        "password",
+      ];
+
+      fields.forEach((field) => {
+        const input = document.getElementById(field);
+        if (!input) return;
+
+        // Remove all status classes first
+        input.classList.remove("error", "success");
+
+        // Only show status if user has interacted with the field
+        if (fieldInteracted[field]) {
+          const value = input.value.trim();
+
+          if (errors[field]) {
+            input.classList.add("error");
+          } else if (value) {
+            input.classList.add("success");
+          }
+        }
+      });
+    }
+
+    // Setup field interaction tracking
+    function setupFieldInteraction(input, fieldName) {
+      // Track when user leaves the field (blur)
+      input.addEventListener("blur", function () {
+        if (!fieldInteracted[fieldName]) {
+          fieldInteracted[fieldName] = true;
+        }
+        validateForm();
+      });
+
+      // Real-time validation while typing (after first interaction)
+      let timeout;
+      input.addEventListener("input", function () {
+        if (!fieldInteracted[fieldName]) {
+          fieldInteracted[fieldName] = true;
+        }
+
+        clearTimeout(timeout);
+        timeout = setTimeout(async () => {
+          await validateForm();
+        }, 500);
+      });
+    }
+
+    // Setup all field interactions
+    setupFieldInteraction(nameInput, "name");
+    setupFieldInteraction(usernameInput, "username");
+    setupFieldInteraction(phoneInput, "phone");
+    setupFieldInteraction(emailInput, "email");
+    setupFieldInteraction(passwordInput, "password");
+
+    // Password toggle
+    document
+      .getElementById("togglePassword")
+      .addEventListener("click", function () {
+        const type = passwordInput.type === "password" ? "text" : "password";
+        passwordInput.type = type;
+        this.innerHTML =
+          type === "password"
+            ? '<i class="fa-solid fa-eye"></i>'
+            : '<i class="fa-solid fa-eye-slash"></i>';
+      });
+
+    // Referral code auto-uppercase and limit with validation
+    let referralTimeout;
+    referralInput.addEventListener("input", function () {
+      this.value = this.value.toUpperCase();
+      if (this.value.length > 6) {
+        this.value = this.value.substring(0, 6);
+      }
+      
+      // Clear previous timeout
+      clearTimeout(referralTimeout);
+      
+      // Validate referral code after typing stops
+      referralTimeout = setTimeout(async () => {
+        const code = this.value.trim();
+        if (code.length === 6) {
+          const result = await validateReferralCode(code);
+          if (!result.valid && code) {
+            // Show error toast for invalid codes
+            showToast(result.message, "error", 3000);
+          }
+        } else if (code.length > 0) {
+          showBonusInfo(false);
+        } else {
+          showBonusInfo(false);
+        }
+      }, 800);
+    });
+
+    // Generate unique referral code
+    async function generateReferralCode(username) {
+      console.log("Generating referral code for username:", username);
+
+      let letters = username
+        .substring(0, 3)
+        .toUpperCase()
+        .replace(/[^A-Z]/g, "A");
+      if (letters.length < 3) letters = letters.padEnd(3, "X");
+
+      let attempts = 0;
+      const maxAttempts = 10;
+
+      while (attempts < maxAttempts) {
+        attempts++;
+        const numbers = Math.floor(100 + Math.random() * 900);
+        const code = letters + numbers;
+
+        const snapshot = await db.ref("referralCodes/" + code).once("value");
+        if (!snapshot.exists()) {
+          console.log("Generated unique referral code:", code);
+          return code;
+        }
+      }
+
+      const timestamp = Date.now().toString().slice(-3);
+      const fallbackCode = letters + timestamp;
+      console.log("Using fallback referral code:", fallbackCode);
+      return fallbackCode;
+    }
+
+    // Registration function - FIXED: Added final synchronous duplicate check
+    registerBtn.addEventListener("click", async () => {
+      console.log("Register button clicked");
+
+      // Mark all fields as interacted for final validation
+      Object.keys(fieldInteracted).forEach((key) => {
+        fieldInteracted[key] = true;
+      });
+
+      // Do final synchronous validation with duplicate checks
+      const isFinalValid = await finalValidationBeforeRegistration();
+
+      if (!isFinalValid) {
+        const firstError = Object.values(errors)[0];
+        console.log("Final validation failed:", firstError);
+        showErrorModal(firstError, "error");
+        updateFieldStatus();
+        return;
+      }
+
+      // Validate referral code if provided
+      const referralCode = referralInput.value.trim();
+      let referralData = null;
+
+      if (referralCode) {
+        console.log("Validating referral code:", referralCode);
+        const refResult = await validateReferralCode(referralCode);
+        if (!refResult.valid) {
+          console.log("Referral code validation failed:", refResult.message);
+          showErrorModal(refResult.message, "error");
+          return;
+        }
+        referralData = refResult.data;
+        console.log("Referral code is valid:", referralData);
+      }
+
+      // Show loading state
+      const originalText = registerBtn.innerHTML;
+      registerBtn.disabled = true;
+      registerBtn.innerHTML =
+        '<i class="fa-solid fa-spinner loading"></i> Creating Account...';
+
+      // Disable all inputs during registration
+      const inputs = [
+        nameInput,
+        usernameInput,
+        phoneInput,
+        emailInput,
+        passwordInput,
+        referralInput,
+      ];
+      inputs.forEach((input) => (input.disabled = true));
+
+      try {
+        console.log("Creating user in Firebase Auth...");
+        const userCredential = await auth.createUserWithEmailAndPassword(
+          emailInput.value.trim(),
+          passwordInput.value
+        );
+
+        const userId = userCredential.user.uid;
+        const username = usernameInput.value.trim();
+        console.log("User created in Auth. User ID:", userId);
+
+        const newReferralCode = await generateReferralCode(username);
+        console.log("Generated new referral code:", newReferralCode);
+
+        const userData = {
+          name: nameInput.value.trim(),
+          username: username,
+          phone: phoneInput.value.trim(),
+          email: emailInput.value.trim(),
+          joinDate: Date.now(),
+          createdAt: Date.now(),
+          status: "active",
+          referralCode: newReferralCode,
+          wallet: {
+            deposited: 0,
+            winnings: 0,
+          },
+          referralStats: {
+            totalReferred: 0,
+            totalEarned: 0,
+            referredBy: null,
+            matchEarningsPending: 0,
+          },
+        };
+
+        // Get current bonus amounts from settings
+        const newUserBonus = appSettings.newUserBonus || 0;
+        const referrerBonus = appSettings.referrerBonus || 0;
+
+        if (referralData) {
+          console.log("Applying referral data from:", referralData.username);
+          userData.referredBy = {
+            userId: referralData.userId,
+            username: referralData.username,
+            code: referralCode,
+            signupBonusGiven: true,
+          };
+
+          // Use the newUserBonus from settings instead of hardcoded 1
+          userData.wallet.deposited = newUserBonus;
+
+          const transactionId = `REF-SIGNUP-${Date.now()}`;
+          console.log("Creating referral bonus transaction:", transactionId);
+          await db.ref("transactions/" + userId + "/" + transactionId).set({
+            amount: newUserBonus,
+            type: "referral_signup_bonus",
+            reason: `Signup bonus using referral code from ${referralData.username}`,
+            timestamp: Date.now(),
+            status: "completed",
+          });
+
+          // Give bonus to referrer
+          if (referrerBonus > 0) {
+            console.log("Giving referrer bonus to:", referralData.userId);
+            const referrerTransactionId = `REF-EARN-${Date.now()}`;
+            
+            // Update referrer's wallet
+            await db.ref(`users/${referralData.userId}/wallet/winnings`).transaction((current) => {
+              return (current || 0) + referrerBonus;
+            });
+            
+            // Create transaction for referrer
+            await db.ref(`transactions/${referralData.userId}/${referrerTransactionId}`).set({
+              amount: referrerBonus,
+              type: "referral_earning",
+              reason: `Referral bonus from ${username}`,
+              timestamp: Date.now(),
+              status: "completed",
+              referredUser: username,
+              referredUserId: userId
+            });
+            
+            // Update referrer's stats
+            await db.ref(`users/${referralData.userId}/referralStats/totalReferred`).transaction((current) => {
+              return (current || 0) + 1;
+            });
+            
+            await db.ref(`users/${referralData.userId}/referralStats/totalEarned`).transaction((current) => {
+              return (current || 0) + referrerBonus;
+            });
+          }
+        }
+
+        console.log("Saving user data to database...");
+        await db.ref("users/" + userId).set(userData);
+        console.log("User data saved successfully");
+
+        console.log("Saving referral code mapping...");
+        await db.ref("referralCodes/" + newReferralCode).set({
+          userId: userId,
+          username: username,
+          createdAt: Date.now(),
+        });
+        console.log("Referral code mapping saved");
+
+        // NEW: Set registration complete flag to prevent further validation
+        registrationComplete = true;
+        
+        // NEW: Remove all field status classes
+        const fields = [
+          "name",
+          "username",
+          "phone",
+          "email",
+          "password",
+        ];
+        fields.forEach((field) => {
+          const input = document.getElementById(field);
+          if (input) {
+            input.classList.remove("error", "success");
+          }
+        });
+
+        // Show success and redirect
+        console.log("Registration successful, redirecting to home page...");
+        setTimeout(() => {
+          window.location.href = "home.html";
+        }, 500);
+      } catch (error) {
+        console.error("Registration error:", error);
+        console.error("Error code:", error.code);
+        console.error("Error message:", error.message);
+
+        let errorMessage = "Registration failed. Please try again.";
+
+        switch (error.code) {
+          case "auth/email-already-in-use":
+            errorMessage = "This email is already registered.";
+            break;
+          case "auth/invalid-email":
+            errorMessage = "Invalid email address format.";
+            break;
+          case "auth/weak-password":
+            errorMessage =
+              "Password is too weak. Please use at least 6 characters.";
+            break;
+          case "auth/network-request-failed":
+            errorMessage = "Network error. Please check your internet connection.";
+            break;
+          case "auth/operation-not-allowed":
+            errorMessage =
+              "Email/password accounts are not enabled. Please contact support.";
+            break;
+          default:
+            errorMessage = `Registration failed: ${error.message}`;
+        }
+
+        console.log("Showing error modal:", errorMessage);
+        showErrorModal(errorMessage, "error");
+
+        // Re-enable inputs and button
+        inputs.forEach((input) => (input.disabled = false));
+        registerBtn.disabled = false;
+        registerBtn.innerHTML = originalText;
+      }
+    });
+
+    // Modal OK button handler
+    modalOkBtn.addEventListener("click", hideErrorModal);
+
+    // Enter key to submit
+    document.addEventListener("keypress", (e) => {
+      if (e.key === "Enter" && !registerBtn.disabled) {
+        registerBtn.click();
+      }
+    });
+
+    // Periodic form validation (for button enable/disable only)
+    // NEW: Store interval reference so we can clear it
+    const validationInterval = setInterval(async () => {
+      // Don't run validation if registration is complete
+      if (registrationComplete) {
+        clearInterval(validationInterval);
+        return;
+      }
+      
+      const isValid = await validateForm();
+      registerBtn.disabled = !isValid;
+    }, 1000);
+  </script>
+</body>
+</html>

@@ -1,0 +1,1155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ElitePros - Login</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+
+<script>
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+</script>
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
+  crossorigin="anonymous"
+/>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    background: #0b1020;
+    font-family: "Inter", sans-serif;
+    color: white;
+    min-height: 100vh;
+  }
+
+  .login-container {
+    background: #0b1020;
+    padding: 1.5rem 1rem;
+    max-width: 500px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 100vh;
+  }
+
+  .app-brand {
+    text-align: center;
+    margin-bottom: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+  }
+
+  .app-logo {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    border: 2px solid #3f3ef2;
+    object-fit: cover;
+    box-shadow: 0 0 20px rgba(63, 62, 242, 0.3);
+  }
+
+  .brand-text {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .app-name {
+    font-size: 2.2rem;
+    font-weight: 900;
+    color: white;
+    letter-spacing: 1px;
+    line-height: 1;
+  }
+
+  .app-tagline {
+    color: #cbd5e1;
+    font-size: 1rem;
+    font-weight: 500;
+    margin-top: 0.25rem;
+  }
+
+  .form-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 16px;
+    padding: 2rem 1.5rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  }
+
+  .input-wrapper {
+    position: relative;
+    margin-bottom: 1.2rem;
+  }
+
+  .input-field {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+    padding: 1.1rem 1rem 1.1rem 3rem;
+    color: white;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+  }
+
+  .input-field::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+    font-weight: 400;
+  }
+
+  .input-field:focus {
+    outline: none;
+    border-color: #3f3ef2;
+    box-shadow: 0 0 0 2px rgba(63, 62, 242, 0.25);
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .input-field.error {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
+  }
+
+  .input-field.success {
+    border-color: #10b981;
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+  }
+
+  .input-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 1.1rem;
+    transition: color 0.3s ease;
+  }
+
+  .input-field:focus + .input-icon {
+    color: #a5b4fc;
+  }
+
+  .password-wrapper {
+    position: relative;
+  }
+
+  .toggle-password {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: rgba(165, 180, 252, 0.7);
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: color 0.2s;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+  }
+
+  .toggle-password:hover {
+    color: #a5b4fc;
+  }
+
+  .login-btn {
+    background: linear-gradient(135deg, #3f3ef2, #6366f1);
+    color: white;
+    font-family: "Inter", sans-serif;
+    font-weight: 700;
+    border-radius: 12px;
+    padding: 1rem;
+    width: 100%;
+    box-shadow: 0 4px 15px rgba(63, 62, 242, 0.3);
+    transition: all 0.3s ease;
+    border: none;
+    font-size: 1rem;
+    margin-top: 0.5rem;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .login-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #6366f1, #4f46e5);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(63, 62, 242, 0.4);
+  }
+
+  .login-btn:disabled {
+    background: #374151;
+    color: #9ca3af;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  .login-btn:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 4px 15px rgba(63, 62, 242, 0.3);
+  }
+
+  .forgot-password {
+    text-align: center;
+    margin-top: 1.5rem;
+    padding: 0 0.5rem;
+    color: #9ca3af;
+    font-size: 0.85rem;
+  }
+
+  .forgot-password a {
+    color: #a5b4fc;
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  .forgot-password a:hover {
+    text-decoration: underline;
+  }
+
+  .register-link {
+    text-align: center;
+    margin-top: 2rem;
+    padding: 0 0.5rem;
+    color: #cbd5e1;
+    font-size: 0.95rem;
+  }
+
+  .register-link a {
+    color: #facc15;
+    text-decoration: none;
+    font-weight: 600;
+  }
+
+  .register-link a:hover {
+    text-decoration: underline;
+  }
+
+  .toast {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: #1f2937;
+    color: white;
+    padding: 1rem 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.9);
+    display: none;
+    font-weight: 600;
+    z-index: 9999;
+    max-width: 90%;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    opacity: 0;
+    transition: transform 0.4s ease, opacity 0.4s ease;
+  }
+
+  .toast.show {
+    display: block;
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  .toast.error {
+    background: #dc2626;
+  }
+
+  .toast.success {
+    background: linear-gradient(135deg, #059669, #10b981);
+    box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);
+  }
+
+  .toast.info {
+    background: linear-gradient(135deg, #3f3ef2, #6366f1);
+    box-shadow: 0 4px 20px rgba(63, 62, 242, 0.4);
+  }
+
+  .loading {
+    display: inline-block;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(5px);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .modal-content {
+    background: #1f2937;
+    padding: 0;
+    border-radius: 16px;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+    animation: slideUp 0.4s ease;
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .modal-header {
+    background: rgba(63, 62, 242, 0.1);
+    padding: 1.25rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .modal-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: white;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+  }
+
+  .modal-title i {
+    font-size: 1.5rem;
+  }
+
+  .modal-body {
+    padding: 1.5rem;
+    color: #e2e8f0;
+    font-size: 1rem;
+    line-height: 1.6;
+    text-align: center;
+  }
+
+  .modal-footer {
+    padding: 0 1.5rem 1.5rem;
+    text-align: center;
+  }
+
+  .modal-btn {
+    background: #3f3ef2;
+    color: white;
+    border: none;
+    padding: 0.75rem 2rem;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(63, 62, 242, 0.3);
+    width: 100%;
+    max-width: 200px;
+  }
+
+  .modal-btn:hover {
+    background: #6366f1;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(63, 62, 242, 0.4);
+  }
+
+  .modal-btn:active {
+    transform: translateY(0);
+  }
+
+  .error-modal .modal-header {
+    background: rgba(239, 68, 68, 0.1);
+  }
+
+  .error-modal .modal-title {
+    color: #fca5a5;
+  }
+
+  .error-modal .modal-btn {
+    background: #ef4444;
+    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+  }
+
+  .error-modal .modal-btn:hover {
+    background: #dc2626;
+    box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+  }
+
+  .success-modal .modal-header {
+    background: rgba(16, 185, 129, 0.1);
+  }
+
+  .success-modal .modal-title {
+    color: #a7f3d0;
+  }
+
+  .success-modal .modal-btn {
+    background: #10b981;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+  }
+
+  .success-modal .modal-btn:hover {
+    background: #059669;
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+  }
+
+  .banned-modal .modal-header {
+    background: rgba(127, 29, 29, 0.3);
+  }
+
+  .banned-modal .modal-title {
+    color: #fecaca;
+  }
+
+  .banned-modal .modal-btn {
+    background: #7f1d1d;
+    box-shadow: 0 4px 15px rgba(127, 29, 29, 0.3);
+  }
+
+  .banned-modal .modal-btn:hover {
+    background: #991b1b;
+    box-shadow: 0 6px 20px rgba(153, 27, 27, 0.4);
+  }
+
+  .forgot-password-modal .modal-header {
+    background: rgba(251, 191, 36, 0.1);
+  }
+
+  .forgot-password-modal .modal-title {
+    color: #fef3c7;
+  }
+
+  .forgot-password-modal .modal-btn {
+    background: #f59e0b;
+    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+  }
+
+  .forgot-password-modal .modal-btn:hover {
+    background: #d97706;
+    box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+  }
+
+  .forgot-password-modal .modal-btn.cancel {
+    background: #6b7280;
+    box-shadow: 0 4px 15px rgba(107, 114, 128, 0.3);
+    margin-left: 1rem;
+  }
+
+  .forgot-password-modal .modal-btn.cancel:hover {
+    background: #4b5563;
+    box-shadow: 0 6px 20px rgba(107, 114, 128, 0.4);
+  }
+
+  .button-group {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+  }
+
+  .reset-instructions {
+    font-size: 0.9rem;
+    color: #9ca3af;
+    margin-top: 1rem;
+    line-height: 1.5;
+  }
+
+  .success-message-container {
+    text-align: center;
+    padding: 20px;
+  }
+
+  .success-icon {
+    font-size: 60px;
+    color: #10b981;
+    margin-bottom: 20px;
+  }
+
+  #closeResetSuccess {
+    margin: 0 auto;
+    display: block;
+  }
+</style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="app-brand">
+      <img
+        src="http://elitepros.wuaze.com/IMG-20260106-WA0000.jpg"
+        class="app-logo"
+        alt="ElitePros Logo"
+      />
+      <div class="brand-text">
+        <h1 class="app-name">ElitePros</h1>
+        <p class="app-tagline">Join the elite gaming community</p>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <form id="loginForm">
+        <div class="input-wrapper">
+          <input
+            type="text"
+            id="identifier"
+            class="input-field"
+            placeholder="Username, Email or Phone"
+            autocomplete="username"
+          />
+          <div class="input-icon">
+            <i class="fa-solid fa-user"></i>
+          </div>
+        </div>
+
+        <div class="input-wrapper">
+          <div class="password-wrapper">
+            <input
+              type="password"
+              id="password"
+              class="input-field"
+              placeholder="Password"
+              autocomplete="current-password"
+            />
+            <div class="input-icon">
+              <i class="fa-solid fa-lock"></i>
+            </div>
+            <button type="button" class="toggle-password" id="togglePassword">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+          </div>
+        </div>
+
+        <button type="button" id="loginBtn" class="login-btn" disabled>
+          Login
+        </button>
+      </form>
+
+      <div class="forgot-password">
+        <a href="#" id="forgotPasswordLink">Forgot Password?</a>
+      </div>
+
+      <div class="register-link">
+        Don't have an account? <a href="register.html">Create Account</a>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <div id="errorModal" class="modal">
+    <div class="modal-content error-modal">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <i class="fa-solid fa-exclamation-circle"></i>
+          Login Failed
+        </h3>
+      </div>
+      <div class="modal-body" id="modalMessage"></div>
+      <div class="modal-footer">
+        <button type="button" class="modal-btn" id="modalOkBtn">Try Again</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="bannedModal" class="modal">
+    <div class="modal-content banned-modal">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <i class="fa-solid fa-ban"></i>
+          Account Banned
+        </h3>
+      </div>
+      <div class="modal-body" id="bannedMessage">
+        Your account has been banned from ElitePros.
+        <br><br>
+        <span id="banReason" style="color: #fecaca; font-style: italic;"></span>
+        <br><br>
+        Please contact support for more information.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="modal-btn" id="bannedOkBtn">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="successModal" class="modal">
+    <div class="modal-content success-modal">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <i class="fa-solid fa-check-circle"></i>
+          Login Successful!
+        </h3>
+      </div>
+      <div class="modal-body" id="successMessage">
+        Welcome back to ElitePros! Redirecting to your dashboard...
+      </div>
+      <div class="modal-footer">
+        <div class="redirecting-text">
+          <i class="fa-solid fa-spinner loading"></i>
+          <span>Redirecting...</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="forgotPasswordModal" class="modal">
+    <div class="modal-content forgot-password-modal">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <i class="fa-solid fa-key"></i>
+          Reset Password
+        </h3>
+      </div>
+      <div class="modal-body">
+        <div id="resetForm">
+          <p>Enter your username, email, or phone number to reset your password.</p>
+          <div class="input-wrapper" style="margin-top: 1.5rem;">
+            <input
+              type="text"
+              id="resetIdentifier"
+              class="input-field"
+              placeholder="Username, Email or Phone"
+              autocomplete="username"
+            />
+            <div class="input-icon">
+              <i class="fa-solid fa-user"></i>
+            </div>
+          </div>
+          <div class="reset-instructions">
+            A password reset link will be sent to your registered email address.
+          </div>
+        </div>
+        
+        <div id="resetSuccessMessage" class="success-message-container" style="display: none;">
+          <div class="success-icon">
+            <i class="fa-solid fa-check-circle"></i>
+          </div>
+          <h3 style="color: #10b981; margin-bottom: 10px;">Reset Link Sent!</h3>
+          <p id="successEmailText" style="color: #cbd5e1; margin-bottom: 15px;"></p>
+          <p style="color: #9ca3af; font-size: 0.9rem;">
+            Check your email inbox for the password reset link.
+          </p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <div id="resetButtons" class="button-group">
+          <button type="button" class="modal-btn cancel" id="cancelResetBtn">
+            Cancel
+          </button>
+          <button type="button" class="modal-btn" id="sendResetBtn">
+            Send Reset Link
+          </button>
+        </div>
+        
+        <button id="closeResetSuccess" class="modal-btn" style="display: none;">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script>
+    // Firebase Configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyC86fii3isDnSOof71h_18PdZehzCEFIFw",
+      authDomain: "eliteprosofficial.firebaseapp.com",
+      projectId: "eliteprosofficial",
+      storageBucket: "eliteprosofficial.firebasestorage.app",
+      messagingSenderId: "646561207100",
+      appId: "1:646561207100:web:47de7b648695367e208439",
+      measurementId: "G-ZN5VNFCSEL",
+    };
+
+    // Initialize Firebase
+    console.log("Initializing Firebase...");
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    console.log("Firebase initialized successfully");
+
+    // Backend API Base URL
+    const API_BASE_URL = "https://elitepros-backend.onrender.com";
+
+    // DOM Elements
+    const identifierInput = document.getElementById("identifier");
+    const passwordInput = document.getElementById("password");
+    const loginBtn = document.getElementById("loginBtn");
+    const toast = document.getElementById("toast");
+    const errorModal = document.getElementById("errorModal");
+    const bannedModal = document.getElementById("bannedModal");
+    const successModal = document.getElementById("successModal");
+    const modalMessage = document.getElementById("modalMessage");
+    const bannedMessage = document.getElementById("bannedMessage");
+    const banReason = document.getElementById("banReason");
+    const modalOkBtn = document.getElementById("modalOkBtn");
+    const bannedOkBtn = document.getElementById("bannedOkBtn");
+    const successMessage = document.getElementById("successMessage");
+    const forgotPasswordLink = document.getElementById("forgotPasswordLink");
+    const forgotPasswordModal = document.getElementById("forgotPasswordModal");
+    const resetIdentifierInput = document.getElementById("resetIdentifier");
+    const sendResetBtn = document.getElementById("sendResetBtn");
+    const cancelResetBtn = document.getElementById("cancelResetBtn");
+    const resetForm = document.getElementById("resetForm");
+    const resetSuccessMessage = document.getElementById("resetSuccessMessage");
+    const successEmailText = document.getElementById("successEmailText");
+    const closeResetSuccess = document.getElementById("closeResetSuccess");
+    const resetButtons = document.getElementById("resetButtons");
+
+    let loginAttempted = false;
+
+    // Show toast message
+    function showToast(message, type = "info", duration = 3000) {
+      toast.classList.remove("show");
+      
+      setTimeout(() => {
+        toast.textContent = message;
+        toast.className = `toast ${type}`;
+        toast.classList.add("show");
+      }, 100);
+
+      setTimeout(() => {
+        toast.classList.remove("show");
+      }, duration);
+    }
+
+    // Show error modal
+    function showErrorModal(message) {
+      modalMessage.textContent = message;
+      errorModal.style.display = "flex";
+    }
+
+    // Hide error modal
+    function hideErrorModal() {
+      errorModal.style.display = "none";
+    }
+
+    // Show banned modal
+    function showBannedModal(reason = "No reason provided") {
+      banReason.textContent = reason;
+      bannedModal.style.display = "flex";
+    }
+
+    // Hide banned modal
+    function hideBannedModal() {
+      bannedModal.style.display = "none";
+    }
+
+    // Show success modal and redirect
+    function showSuccessModal(username = "") {
+      if (username) {
+        successMessage.innerHTML = `Welcome back <span style="color: #facc15; font-weight: 600;">${username}</span>!<br>Redirecting to your dashboard...`;
+      }
+      successModal.style.display = "flex";
+      
+      setTimeout(() => {
+        window.location.href = "home.html";
+      }, 2000);
+    }
+
+    // Show forgot password modal
+    function showForgotPasswordModal() {
+      resetIdentifierInput.value = "";
+      resetForm.style.display = "block";
+      resetSuccessMessage.style.display = "none";
+      resetButtons.style.display = "flex";
+      closeResetSuccess.style.display = "none";
+      
+      forgotPasswordModal.style.display = "flex";
+      resetIdentifierInput.focus();
+    }
+
+    // Hide forgot password modal
+    function hideForgotPasswordModal() {
+      forgotPasswordModal.style.display = "none";
+    }
+
+    // Show success state in forgot password modal
+    function showResetSuccess(userEmail) {
+      resetForm.style.display = "none";
+      resetSuccessMessage.style.display = "block";
+      resetButtons.style.display = "none";
+      closeResetSuccess.style.display = "block";
+      
+      successEmailText.textContent = `Password reset link has been sent to: ${userEmail}`;
+    }
+
+    // Validate login form
+    function validateForm() {
+      const identifier = identifierInput.value.trim();
+      const password = passwordInput.value.trim();
+      
+      if (identifier && password && password.length >= 6) {
+        loginBtn.disabled = false;
+        if (loginAttempted) {
+          identifierInput.classList.remove("error");
+          passwordInput.classList.remove("error");
+        }
+      } else {
+        loginBtn.disabled = true;
+        
+        if (loginAttempted) {
+          if (!identifier) {
+            identifierInput.classList.add("error");
+          } else {
+            identifierInput.classList.remove("error");
+          }
+          
+          if (!password || password.length < 6) {
+            passwordInput.classList.add("error");
+          } else {
+            passwordInput.classList.remove("error");
+          }
+        }
+      }
+    }
+
+    // Get user-friendly error message
+    function getUserFriendlyError(error) {
+      console.log("Error:", error);
+      
+      if (error.response) {
+        const status = error.response.status;
+        const data = error.response.data;
+        
+        if (status === 404) {
+          return "User not found. Please check your username, email or phone number.";
+        } else if (status === 403) {
+          return "Your account has been banned. Please contact support.";
+        } else if (data && data.message) {
+          return data.message;
+        }
+      }
+      
+      switch (error.code) {
+        case "auth/user-not-found":
+          return "User not found. Please check your username, email or phone number.";
+        case "auth/wrong-password":
+          return "Incorrect password. Please try again.";
+        case "auth/invalid-email":
+          return "Invalid email format. Please enter a valid email address.";
+        case "auth/invalid-credential":
+          return "Invalid credentials. Please check your login details.";
+        case "auth/too-many-requests":
+          return "Too many login attempts. Please try again in a few minutes.";
+        case "auth/network-request-failed":
+          return "Network error. Please check your internet connection.";
+        case "auth/user-disabled":
+          return "This account has been disabled. Please contact support.";
+        default:
+          return error.message || "Login failed. Please check your credentials and try again.";
+      }
+    }
+
+    // Login function
+    loginBtn.addEventListener("click", async () => {
+      const identifier = identifierInput.value.trim();
+      const password = passwordInput.value.trim();
+      
+      loginAttempted = true;
+      
+      if (!identifier) {
+        showErrorModal("Please enter your username, email, or phone number.");
+        identifierInput.classList.add("error");
+        return;
+      }
+      
+      if (!password) {
+        showErrorModal("Please enter your password.");
+        passwordInput.classList.add("error");
+        return;
+      }
+      
+      if (password.length < 6) {
+        showErrorModal("Password must be at least 6 characters.");
+        passwordInput.classList.add("error");
+        return;
+      }
+
+      const originalText = loginBtn.innerHTML;
+      loginBtn.disabled = true;
+      loginBtn.innerHTML = '<i class="fa-solid fa-spinner loading"></i> Logging In...';
+
+      try {
+        // Step 1: Resolve identifier to email
+        console.log("Resolving identifier:", identifier);
+        const resolveResponse = await fetch(`${API_BASE_URL}/api/auth/resolve-identifier`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ identifier }),
+        });
+
+        if (!resolveResponse.ok) {
+          if (resolveResponse.status === 404) {
+            throw new Error("User not found");
+          } else if (resolveResponse.status === 403) {
+            const errorData = await resolveResponse.json();
+            // Check if this is a ban response
+            if (errorData.banned) {
+              showBannedModal(errorData.reason || "Your account has been banned.");
+              loginBtn.disabled = false;
+              loginBtn.innerHTML = originalText;
+              return;
+            }
+            throw new Error(errorData.message || "Access denied");
+          } else {
+            const errorData = await resolveResponse.json();
+            throw new Error(errorData.message || "Failed to resolve identifier");
+          }
+        }
+
+        const resolveData = await resolveResponse.json();
+        const userEmail = resolveData.email;
+        const username = resolveData.username || "";
+
+        console.log("Resolved email:", userEmail);
+
+        // Step 2: Login with Firebase
+        console.log("Logging in with email:", userEmail);
+        const userCredential = await auth.signInWithEmailAndPassword(userEmail, password);
+        
+        console.log("Firebase login successful. User ID:", userCredential.user.uid);
+
+        // Step 3: Get ID token and create session
+        const idToken = await userCredential.user.getIdToken();
+        
+        console.log("Creating session with backend...");
+        const sessionResponse = await fetch(`${API_BASE_URL}/api/auth/session`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${idToken}`,
+          },
+        });
+
+        if (!sessionResponse.ok) {
+          if (sessionResponse.status === 403) {
+            const sessionData = await sessionResponse.json();
+            // Check if this is a ban response
+            if (sessionData.banned) {
+              showBannedModal(sessionData.reason || "Your account has been banned.");
+              // Sign out from Firebase since account is banned
+              await auth.signOut();
+              loginBtn.disabled = false;
+              loginBtn.innerHTML = originalText;
+              return;
+            }
+            throw new Error(sessionData.message || "Session creation failed");
+          } else {
+            const sessionData = await sessionResponse.json();
+            throw new Error(sessionData.message || "Session creation failed");
+          }
+        }
+
+        const sessionData = await sessionResponse.json();
+        console.log("Session created successfully");
+
+        // Clear error states
+        identifierInput.classList.remove("error");
+        passwordInput.classList.remove("error");
+        
+        // Show success modal and redirect
+        showSuccessModal(username || userCredential.user.displayName || "");
+        
+      } catch (error) {
+        console.error("Login error:", error);
+        
+        // Mark fields as error
+        identifierInput.classList.add("error");
+        passwordInput.classList.add("error");
+        
+        // Show error modal
+        showErrorModal(getUserFriendlyError(error));
+        
+        // Re-enable login button
+        loginBtn.disabled = false;
+        loginBtn.innerHTML = originalText;
+      }
+    });
+
+    // Forgot Password Flow
+    forgotPasswordLink.addEventListener("click", function(e) {
+      e.preventDefault();
+      showForgotPasswordModal();
+    });
+
+    async function sendPasswordReset() {
+      const identifier = resetIdentifierInput.value.trim();
+      
+      if (!identifier) {
+        showToast("Please enter your username, email, or phone number.", "error");
+        resetIdentifierInput.focus();
+        return;
+      }
+
+      const originalText = sendResetBtn.innerHTML;
+      sendResetBtn.disabled = true;
+      sendResetBtn.innerHTML = '<i class="fa-solid fa-spinner loading"></i> Sending...';
+
+      try {
+        console.log("Processing password reset for:", identifier);
+        
+        // Step 1: Resolve identifier to email via backend
+        const resolveResponse = await fetch(`${API_BASE_URL}/api/auth/forgot-password`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ identifier }),
+        });
+
+        if (!resolveResponse.ok) {
+          if (resolveResponse.status === 404) {
+            throw new Error("No account found with this username, email, or phone number.");
+          } else if (resolveResponse.status === 403) {
+            const errorData = await resolveResponse.json();
+            if (errorData.banned) {
+              throw new Error("This account has been banned. Password reset is not allowed.");
+            }
+            throw new Error(errorData.message || "Access denied");
+          } else {
+            const errorData = await resolveResponse.json();
+            throw new Error(errorData.message || "Failed to process request");
+          }
+        }
+
+        const resolveData = await resolveResponse.json();
+        const userEmail = resolveData.email;
+
+        console.log("Resolved email for password reset:", userEmail);
+
+        // Step 2: Send password reset email via Firebase
+        await auth.sendPasswordResetEmail(userEmail);
+        
+        console.log("Password reset email sent successfully to:", userEmail);
+        
+        // Show success message
+        showResetSuccess(userEmail);
+        
+      } catch (error) {
+        console.error("Password reset error:", error);
+        
+        let errorMessage = error.message || "Failed to send reset link. Please try again.";
+        showToast(errorMessage, "error");
+        
+        sendResetBtn.disabled = false;
+        sendResetBtn.innerHTML = originalText;
+      }
+    }
+
+    sendResetBtn.addEventListener("click", sendPasswordReset);
+
+    cancelResetBtn.addEventListener("click", hideForgotPasswordModal);
+
+    closeResetSuccess.addEventListener("click", hideForgotPasswordModal);
+
+    // Close modals when clicking outside
+    window.addEventListener("click", function(event) {
+      if (event.target === forgotPasswordModal) {
+        hideForgotPasswordModal();
+      }
+      if (event.target === errorModal) {
+        hideErrorModal();
+      }
+      if (event.target === bannedModal) {
+        hideBannedModal();
+      }
+      if (event.target === successModal) {
+        // Don't close success modal
+      }
+    });
+
+    // Enter key in reset identifier input
+    resetIdentifierInput.addEventListener("keypress", function(e) {
+      if (e.key === "Enter") {
+        sendPasswordReset();
+      }
+    });
+
+    // Modal OK button handlers
+    modalOkBtn.addEventListener("click", hideErrorModal);
+    bannedOkBtn.addEventListener("click", hideBannedModal);
+
+    // Real-time form validation
+    identifierInput.addEventListener("input", function() {
+      if (loginAttempted) {
+        identifierInput.classList.remove("error");
+      }
+      validateForm();
+    });
+    
+    passwordInput.addEventListener("input", function() {
+      if (loginAttempted) {
+        passwordInput.classList.remove("error");
+      }
+      validateForm();
+    });
+
+    // Password toggle
+    document
+      .getElementById("togglePassword")
+      .addEventListener("click", function () {
+        const type = passwordInput.type === "password" ? "text" : "password";
+        passwordInput.type = type;
+        this.innerHTML =
+          type === "password"
+            ? '<i class="fa-solid fa-eye"></i>'
+            : '<i class="fa-solid fa-eye-slash"></i>';
+      });
+
+    // Enter key to submit login
+    document.addEventListener("keypress", (e) => {
+      if (e.key === "Enter" && !loginBtn.disabled) {
+        loginBtn.click();
+      }
+    });
+
+    // Validate form on page load
+    validateForm();
+  </script>
+</body>
+</html>

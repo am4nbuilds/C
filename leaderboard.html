@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaderboard - ElitePros</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    
+    <style>
+        :root {
+            --bg-dark: #0b1020;
+            --card-bg: #1f2340;
+            --card-dark: #121322;
+            --accent: #3f3ef2;
+            --muted: #9aa3b2;
+            --primary-green: #4ade80;
+            --header-bg: #111827;
+            --wallet-bg: #1f2937;
+            --joined-color: #0d9488;
+            --first-place: #ff4757;
+            --second-place: #2ed573;
+            --third-place: #1e90ff;
+            --top10-border: #374151;
+        }
+        
+        body {
+            background: var(--bg-dark);
+            color: white;
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+            margin: 0;
+            padding: 0;
+            padding-bottom: 70px; /* Space for bottom navigation */
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+        
+        /* Header - Modified */
+        .header-bar {
+            background: var(--header-bg);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            position: relative;
+        }
+        
+        .app-logo {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 2px solid rgba(99, 102, 241, 0.5);
+            flex-shrink: 0;
+        }
+        
+        .page-title {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+        }
+        
+        .page-title-text {
+            font-weight: 800;
+            font-size: 18px;
+            background: linear-gradient(135deg, #fff, #a5b4fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            white-space: nowrap;
+        }
+        
+        /* Filter Select Button - FIXED WIDTH */
+        .filter-select-container {
+            margin-left: auto;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .filter-select-button {
+            background: linear-gradient(135deg, #1f2340, #121322);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: white;
+            padding: 10px 12px; /* Reduced padding */
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px; /* Reduced gap */
+            min-width: 110px; /* Reduced from 140px */
+            max-width: 120px; /* Added max-width */
+            justify-content: space-between;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+        
+        .filter-select-button span {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .filter-select-button:hover {
+            border-color: rgba(99, 102, 241, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(63, 62, 242, 0.2);
+        }
+        
+        .filter-select-button i {
+            transition: transform 0.3s ease;
+            flex-shrink: 0;
+        }
+        
+        .filter-select-button.open i {
+            transform: rotate(180deg);
+        }
+        
+        .filter-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 8px;
+            background: linear-gradient(135deg, #1f2340, #121322);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            min-width: 140px; /* Reduced from 160px */
+            max-width: 150px; /* Added max-width */
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            display: none;
+            z-index: 1000;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+        
+        .filter-dropdown.open {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .filter-option {
+            padding: 12px 14px; /* Slightly reduced padding */
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 14px;
+        }
+        
+        .filter-option:last-child {
+            border-bottom: none;
+        }
+        
+        .filter-option:hover {
+            background: rgba(99, 102, 241, 0.1);
+        }
+        
+        .filter-option.active {
+            background: linear-gradient(90deg, rgba(63, 62, 242, 0.2), rgba(99, 102, 241, 0.1));
+            color: #a5b4fc;
+        }
+        
+        .filter-option i {
+            width: 18px; /* Slightly smaller icons */
+            text-align: center;
+            color: #9ca3af;
+            font-size: 14px;
+        }
+        
+        .filter-option.active i {
+            color: #a5b4fc;
+        }
+        
+        /* Leaderboard Container */
+        .leaderboard-container {
+            margin: 16px;
+            background: linear-gradient(135deg, #1f2340, #121322);
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 8px 30px rgba(2,6,23,0.7);
+            overflow: hidden;
+            min-height: 600px; /* Increased from 500px for better empty state */
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Leaderboard Header - Centered */
+        .leaderboard-header {
+            background: rgba(11, 16, 32, 0.8);
+            padding: 20px 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        
+        .leaderboard-title {
+            font-weight: 800;
+            font-size: 18px;
+            background: linear-gradient(135deg, #fff, #a5b4fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-align: center;
+            width: 100%;
+        }
+        
+        /* Stats Bar */
+        .stats-bar {
+            display: flex;
+            background: rgba(17, 24, 39, 0.7);
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-weight: 600;
+            font-size: 13px;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            flex-shrink: 0;
+        }
+        
+        .stat-column {
+            flex: 1;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .stat-rank {
+            flex: 0.5;
+        }
+        
+        .stat-player {
+            flex: 2;
+            justify-content: flex-start;
+            padding-left: 20px;
+        }
+        
+        .stat-winnings, .stat-reward {
+            flex: 1.2;
+        }
+        
+        .stat-profile {
+            flex: 0.8;
+        }
+        
+        /* Leaderboard List */
+        .leaderboard-list {
+            padding: 0;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 400px; /* Ensures minimum height for empty state */
+        }
+        
+        /* Leaderboard Item - SIMPLE DESIGN */
+        .leaderboard-item {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+            position: relative;
+            background: transparent;
+            border-radius: 0;
+            border: none;
+            animation: none;
+        }
+        
+        .leaderboard-item:hover {
+            background: rgba(255,255,255,0.02);
+        }
+        
+        /* Rank Badge - SIMPLE STYLE */
+        .rank-badge {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 18px;
+            margin-right: 12px;
+            flex-shrink: 0;
+            background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(255,255,255,0.1);
+            color: white;
+        }
+        
+        /* Profile Image Container - REMOVED */
+        
+        /* USER INFO */
+        .user-info {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-width: 0;
+            text-align: left;
+            padding-left: 10px;
+        }
+        
+        .user-name {
+            font-weight: 700;
+            font-size: 17px;
+            color: white;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .username-prefix {
+            color: #9ca3af;
+            margin-right: 4px;
+            font-weight: 600;
+        }
+        
+        /* WINNINGS & REWARD COLUMNS - NO GLOW EFFECT */
+        .winnings, .reward {
+            text-align: center;
+            flex: 1.2;
+            padding: 0 8px;
+        }
+        
+        .winnings-amount, .reward-amount {
+            font-weight: 800;
+            font-size: 19px;
+            color: #facc15;
+            text-shadow: none; /* REMOVED text-shadow */
+        }
+        
+        .winnings-label, .reward-label {
+            font-size: 12px;
+            color: #94a3b8;
+            margin-top: 4px;
+        }
+        
+        .reward-amount {
+            color: #10b981;
+            text-shadow: none; /* REMOVED text-shadow */
+        }
+        
+        /* PROFILE COLUMN */
+        .profile-column {
+            flex: 0.8;
+            text-align: center;
+            padding: 0 8px;
+        }
+        
+        .profile-link {
+            background: linear-gradient(135deg, #3f3ef2, #6366f1);
+            color: white;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 0 auto;
+            border: none;
+            font-size: 18px;
+        }
+        
+        .profile-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(63, 62, 242, 0.4);
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        }
+        
+        /* CURRENT USER HIGHLIGHT */
+        .current-user {
+            background: linear-gradient(90deg, rgba(63, 62, 242, 0.1), rgba(99, 102, 241, 0.05));
+        }
+        
+        /* REMOVED ALL BORDER EFFECTS */
+        
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, #111827, #1f2937);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 8px 0;
+            z-index: 1000;
+            border-top: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #9ca3af;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            padding: 8px 16px;
+            border-radius: 12px;
+            position: relative;
+            min-width: 70px;
+        }
+        
+        .nav-item:hover {
+            color: #a5b4fc;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .nav-item.active {
+            color: #ffffff;
+            background: linear-gradient(135deg, #3f3ef2, #6366f1);
+            box-shadow: 0 8px 25px rgba(63,62,242,0.25);
+            transform: translateY(-15px);
+        }
+        
+        .nav-item i {
+            font-size: 1.25rem;
+            margin-bottom: 4px;
+        }
+        
+        .nav-item span {
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        
+        /* Leaderboard Button Popup Effect */
+        .nav-leaderboard.active {
+            animation: none; /* REMOVED leaderboardGlow */
+        }
+        
+        /* Skeleton Loading */
+        .skeleton-container {
+            padding-bottom: 20px;
+        }
+        
+        .skeleton-shimmer {
+            background: linear-gradient(90deg, 
+                rgba(255, 255, 255, 0.05) 25%, 
+                rgba(255, 255, 255, 0.1) 50%, 
+                rgba(255, 255, 255, 0.05) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 8px;
+        }
+        
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        
+        .skeleton-header {
+            height: 80px;
+            margin: 16px;
+            border-radius: 20px;
+        }
+        
+        .skeleton-item {
+            height: 84px;
+            margin: 0 16px 12px;
+            border-radius: 16px;
+        }
+        
+        /* IMPROVED Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px; /* Reduced padding */
+            color: #94a3b8;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 300px; /* Fixed height */
+        }
+        
+        .empty-icon {
+            font-size: 48px; /* Smaller icon */
+            margin-bottom: 16px;
+            opacity: 0.3;
+        }
+        
+        .empty-state h3 {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: #9ca3af;
+        }
+        
+        .empty-state p {
+            font-size: 14px;
+            max-width: 250px;
+            line-height: 1.5;
+        }
+        
+        /* Error Message */
+        .error-message {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            padding: 12px 16px;
+            text-align: center;
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 2px 10px rgba(239,68,68,0.3);
+        }
+        
+        /* Loading Spinner */
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: #3f3ef2;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Error Message -->
+    <div id="errorMessage" class="error-message" style="display:none;">
+        <i class="fas fa-exclamation-triangle"></i>
+        <span id="errorText"></span>
+    </div>
+
+    <!-- Header with Centered Title and Filter Select -->
+    <div class="header-bar">
+        <div class="app-logo">
+            <img id="appLogo" src="http://elitepros.wuaze.com/IMG-20260106-WA0000.jpg" alt="ElitePros" style="width:100%;height:100%;object-fit:cover;">
+        </div>
+
+        <div class="page-title">
+            <div class="page-title-text">Leaderboard</div>
+        </div>
+
+        <!-- Filter Select Button -->
+        <div class="filter-select-container">
+            <div class="filter-select-button" id="filterSelectButton" onclick="toggleFilterDropdown()">
+                <span id="currentFilterText">Today</span>
+                <i class="fas fa-chevron-down"></i>
+            </div>
+            
+            <div class="filter-dropdown" id="filterDropdown">
+                <div class="filter-option active" data-filter="today" onclick="selectFilter('today')">
+                    <i class="fas fa-calendar-day"></i>
+                    <span>Today</span>
+                </div>
+                <div class="filter-option" data-filter="weekly" onclick="selectFilter('weekly')">
+                    <i class="fas fa-calendar-week"></i>
+                    <span>This Week</span>
+                </div>
+                <div class="filter-option" data-filter="monthly" onclick="selectFilter('monthly')">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>This Month</span>
+                </div>
+                <div class="filter-option" data-filter="allTime" onclick="selectFilter('allTime')">
+                    <i class="fas fa-trophy"></i>
+                    <span>All Time</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Skeleton Loader -->
+    <div id="skeletonContainer" class="skeleton-container">
+        <div class="skeleton-header skeleton-shimmer"></div>
+        <div class="skeleton-item skeleton-shimmer"></div>
+        <div class="skeleton-item skeleton-shimmer"></div>
+        <div class="skeleton-item skeleton-shimmer"></div>
+        <div class="skeleton-item skeleton-shimmer"></div>
+        <div class="skeleton-item skeleton-shimmer"></div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="mainContent" style="display:none;">
+        <!-- Leaderboard Container -->
+        <div class="leaderboard-container">
+            <!-- Header with Centered Title -->
+            <div class="leaderboard-header">
+                <div class="leaderboard-title" id="leaderboardTitle">Players of the Day</div>
+            </div>
+            
+            <!-- Stats Bar -->
+            <div class="stats-bar">
+                <div class="stat-column stat-rank">Rank</div>
+                <div class="stat-column stat-player">Player</div>
+                <div class="stat-column stat-winnings">Winnings</div>
+                <div class="stat-column stat-reward">Reward</div>
+                <div class="stat-column stat-profile">Profile</div>
+            </div>
+            
+            <!-- Leaderboard List -->
+            <div class="leaderboard-list" id="leaderboardList">
+                <div class="empty-state" id="emptyState">
+                    <div class="empty-icon">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <h3>No players found</h3>
+                    <p>Be the first to join the leaderboard!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <a href="leaderboard.html" class="nav-item active nav-leaderboard">
+            <i class="fa-solid fa-ranking-star"></i>
+            <span>Leaderboard</span>
+        </a>
+        <a href="home.html" class="nav-item">
+            <i class="fa-solid fa-house"></i>
+            <span>Home</span>
+        </a>
+        <a href="account.html" class="nav-item">
+            <i class="fa-solid fa-user-circle"></i>
+            <span>Account</span>
+        </a>
+    </nav>
+
+   <script>
+    // ====================================================================
+    // LEADERBOARD JAVASCRIPT WITH TRANSACTION-BASED WINNINGS CALCULATION
+    // ====================================================================
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyC86fii3isDnSOof71h_18PdZehzCEFIFw",
+        authDomain: "eliteprosofficial.firebaseapp.com",
+        databaseURL: "https://eliteprosofficial-default-rtdb.firebaseio.com",
+        projectId: "eliteprosofficial",
+        storageBucket: "eliteprosofficial.firebasestorage.app",
+        messagingSenderId: "646561207100",
+        appId: "1:646561207100:web:47de7b648695367e208439",
+        measurementId: "G-ZN5VNFCSEL"
+    };
+    
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+    const auth = firebase.auth();
+
+    // Global State
+    let USER_UID = null;
+    let currentFilter = 'today';
+    let leaderboardRewards = {
+        today: {},
+        weekly: {},
+        monthly: {}
+    };
+    
+    // DOM Elements
+    const skeletonContainer = document.getElementById('skeletonContainer');
+    const mainContent = document.getElementById('mainContent');
+    const errorMessage = document.getElementById('errorMessage');
+    const errorText = document.getElementById('errorText');
+    const leaderboardList = document.getElementById('leaderboardList');
+    const leaderboardTitle = document.getElementById('leaderboardTitle');
+    const filterSelectButton = document.getElementById('filterSelectButton');
+    const filterDropdown = document.getElementById('filterDropdown');
+    const currentFilterText = document.getElementById('currentFilterText');
+
+    // Header Titles Mapping
+    const headerTitles = {
+        today: "Players of the Day",
+        weekly: "Players of the Week",
+        monthly: "Players of the Month",
+        allTime: "All Time Champions"
+    };
+
+    // Utility Functions
+    function getCutoffTimestamp(filter) {
+        const now = new Date();
+        
+        switch(filter) {
+            case 'today':
+                // Start of today (midnight)
+                const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                return today.getTime();
+                
+            case 'weekly':
+                // Start of current week (Monday)
+                const day = now.getDay(); // 0 = Sunday, 1 = Monday
+                const diff = day === 0 ? 6 : day - 1; // Days since Monday
+                const monday = new Date(now);
+                monday.setDate(now.getDate() - diff);
+                monday.setHours(0, 0, 0, 0);
+                return monday.getTime();
+                
+            case 'monthly':
+                // Start of current month
+                const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+                return firstDay.getTime();
+                
+            case 'allTime':
+                // All time (earliest possible date)
+                return 0;
+                
+            default:
+                return 0;
+        }
+    }
+
+    // Filter Dropdown Functions
+    function toggleFilterDropdown() {
+        filterDropdown.classList.toggle('open');
+        filterSelectButton.classList.toggle('open');
+        
+        // Close dropdown when clicking outside
+        if (filterDropdown.classList.contains('open')) {
+            setTimeout(() => {
+                document.addEventListener('click', closeFilterDropdownOutside);
+            }, 10);
+        } else {
+            document.removeEventListener('click', closeFilterDropdownOutside);
+        }
+    }
+    
+    function closeFilterDropdownOutside(event) {
+        if (!filterSelectButton.contains(event.target) && !filterDropdown.contains(event.target)) {
+            filterDropdown.classList.remove('open');
+            filterSelectButton.classList.remove('open');
+            document.removeEventListener('click', closeFilterDropdownOutside);
+        }
+    }
+    
+    function selectFilter(filter) {
+        currentFilter = filter;
+        
+        // Shorten display text for the button
+        let displayText = formatTimeFilter(filter);
+        if (displayText === 'This Week') displayText = 'Week';
+        if (displayText === 'This Month') displayText = 'Month';
+        if (displayText === 'All Time') displayText = 'All Time';
+        
+        currentFilterText.textContent = displayText;
+        
+        // Update active option in dropdown
+        document.querySelectorAll('.filter-option').forEach(option => {
+            if (option.dataset.filter === filter) {
+                option.classList.add('active');
+            } else {
+                option.classList.remove('active');
+            }
+        });
+        
+        // Close dropdown
+        filterDropdown.classList.remove('open');
+        filterSelectButton.classList.remove('open');
+        document.removeEventListener('click', closeFilterDropdownOutside);
+        
+        // Load leaderboard with new filter
+        loadLeaderboard(filter);
+    }
+
+    // UI Functions
+    function showError(message) {
+        errorText.textContent = message;
+        errorMessage.style.display = 'flex';
+        setTimeout(() => {
+            errorMessage.style.display = 'none';
+        }, 5000);
+    }
+
+    function formatCurrency(amount) {
+        return '₹' + parseInt(amount || 0).toLocaleString();
+    }
+
+    function formatTimeFilter(filter) {
+        switch(filter) {
+            case 'today': return 'Today';
+            case 'weekly': return 'This Week';
+            case 'monthly': return 'This Month';
+            case 'allTime': return 'All Time';
+            default: return 'Today';
+        }
+    }
+
+    // Calculate winnings from transactions for a specific user and time period
+    async function calculateUserWinnings(userId, filter) {
+        try {
+            const cutoffTimestamp = getCutoffTimestamp(filter);
+            
+            // For allTime, get total winnings from wallet
+            if (filter === 'allTime') {
+                const userSnapshot = await database.ref('users/' + userId).once('value');
+                const userData = userSnapshot.val();
+                if (userData && userData.wallet && userData.wallet.winnings !== undefined) {
+                    return parseFloat(userData.wallet.winnings) || 0;
+                }
+                return 0;
+            }
+            
+            // For time-based filters, calculate from transactions
+            let totalWinnings = 0;
+            
+            // Get transactions for this user
+            const transactionsRef = database.ref('transactions/' + userId);
+            const snapshot = await transactionsRef.once('value');
+            
+            if (snapshot.exists()) {
+                const transactions = snapshot.val();
+                
+                Object.values(transactions).forEach(transaction => {
+                    // Check if transaction is within the time period
+                    const txTimestamp = transaction.timestamp || 0;
+                    
+                    if (txTimestamp >= cutoffTimestamp) {
+                        // Check if it's a winning transaction
+                        const txType = transaction.type || '';
+                        const txStatus = transaction.status || '';
+                        const amount = parseFloat(transaction.amount) || 0;
+                        
+                        // Winning transaction types (based on your wallet.html)
+                        const winningTypes = [
+                            'Match Winnings', 
+                            'Winning', 
+                            'Winnings', 
+                            'Tournament Win',
+                            'Refund' // Refunds are also positive additions
+                        ];
+                        
+                        // Only count successful winning transactions with positive amount
+                        if ((winningTypes.includes(txType) || txType.toLowerCase().includes('win')) 
+                            && (txStatus === 'Success' || txStatus === 'Completed' || !txStatus) 
+                            && amount > 0) {
+                            totalWinnings += amount;
+                        }
+                    }
+                });
+            }
+            
+            return totalWinnings;
+            
+        } catch (error) {
+            console.error('Error calculating winnings for user:', userId, error);
+            return 0;
+        }
+    }
+
+    // Load reward amounts from Firebase
+    async function loadRewardAmounts() {
+        try {
+            const rewardsSnapshot = await database.ref('leaderboardRewards').once('value');
+            if (rewardsSnapshot.exists()) {
+                leaderboardRewards = rewardsSnapshot.val();
+                console.log('Loaded rewards:', leaderboardRewards);
+            } else {
+                // Set default rewards if none exist
+                leaderboardRewards = {
+                    today: {1: 1000, 2: 500, 3: 250, 4: 100, 5: 50, 6: 40, 7: 30, 8: 20, 9: 10, 10: 5},
+                    weekly: {1: 5000, 2: 2500, 3: 1000, 4: 500, 5: 250, 6: 100, 7: 50, 8: 25, 9: 10, 10: 5},
+                    monthly: {1: 20000, 2: 10000, 3: 5000, 4: 2500, 5: 1000, 6: 500, 7: 250, 8: 100, 9: 50, 10: 25}
+                };
+                
+                try {
+                    // Try to save default rewards to Firebase
+                    await database.ref('leaderboardRewards').set(leaderboardRewards);
+                } catch (writeError) {
+                    console.log('Could not write default rewards (admin only), using local defaults');
+                }
+            }
+        } catch (error) {
+            console.error('Error loading rewards:', error);
+            // Use local defaults if can't load from Firebase
+            leaderboardRewards = {
+                today: {1: 1000, 2: 500, 3: 250, 4: 100, 5: 50, 6: 40, 7: 30, 8: 20, 9: 10, 10: 5},
+                weekly: {1: 5000, 2: 2500, 3: 1000, 4: 500, 5: 250, 6: 100, 7: 50, 8: 25, 9: 10, 10: 5},
+                monthly: {1: 20000, 2: 10000, 3: 5000, 4: 2500, 5: 1000, 6: 500, 7: 250, 8: 100, 9: 50, 10: 25}
+            };
+        }
+    }
+    
+    // Get reward amount for a specific rank and filter
+    function getRewardAmount(filter, rank) {
+        if (filter === 'allTime') return 0; // No rewards for all-time
+        
+        const rewards = leaderboardRewards[filter];
+        return rewards && rewards[rank] ? rewards[rank] : 0;
+    }
+
+    // Load leaderboard with transaction-based winnings
+    async function loadLeaderboard(filter = 'today') {
+        console.log('Loading leaderboard for:', filter, 'with transaction calculation');
+        
+        // Update header title
+        leaderboardTitle.textContent = headerTitles[filter] || headerTitles.today;
+        
+        // Show loading state
+        leaderboardList.innerHTML = `
+            <div style="text-align: center; padding: 80px 20px; color: #94a3b8; flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 300px;">
+                <div class="loading-spinner" style="margin: 0 auto 20px; width: 30px; height: 30px;"></div>
+                <p style="font-size: 16px;">Loading leaderboard...</p>
+            </div>
+        `;
+        
+        try {
+            const snapshot = await database.ref('users').once('value');
+            console.log('Total users in database:', snapshot.numChildren());
+            
+            if (!snapshot.exists()) {
+                showNoData();
+                return;
+            }
+            
+            const usersData = snapshot.val();
+            const usersArray = [];
+            
+            // Process each user to calculate winnings
+            const userPromises = Object.entries(usersData).map(async ([userId, userData]) => {
+                if (!userData) return null;
+                
+                // Get username
+                let userName = 'Player';
+                if (userData.username) {
+                    userName = userData.username;
+                } else if (userData.name) {
+                    userName = userData.name;
+                } else if (userData.ign) {
+                    userName = userData.ign;
+                } else if (userData.email) {
+                    userName = userData.email.split('@')[0];
+                } else {
+                    userName = 'Player_' + userId.substring(0, 4);
+                }
+                
+                // Calculate winnings for this filter period
+                const earnings = await calculateUserWinnings(userId, filter);
+                
+                // Only include users with earnings > 0
+                if (earnings > 0) {
+                    return {
+                        id: userId,
+                        name: userName,
+                        earnings: earnings,
+                        isCurrentUser: userId === USER_UID
+                    };
+                }
+                
+                return null;
+            });
+            
+            // Wait for all calculations to complete
+            const userResults = await Promise.all(userPromises);
+            
+            // Filter out null results and sort
+            const validUsers = userResults.filter(user => user !== null);
+            
+            console.log('Users with winnings for', filter + ':', validUsers.length);
+            
+            if (validUsers.length === 0) {
+                showNoData();
+                return;
+            }
+            
+            // Sort by earnings (descending)
+            validUsers.sort((a, b) => b.earnings - a.earnings);
+            
+            // Take only top 10
+            const top10Users = validUsers.slice(0, 10);
+            
+            // Display leaderboard
+            displayLeaderboard(top10Users, filter);
+            
+        } catch (error) {
+            console.error('Leaderboard error:', error);
+            showError('Failed to load leaderboard. Please try again.');
+            showNoData();
+        }
+    }
+
+    function displayLeaderboard(users, filter) {
+        let html = '';
+        
+        users.forEach((user, index) => {
+            const rank = index + 1;
+            
+            // Get reward amount
+            const rewardAmount = getRewardAmount(filter, rank);
+            
+            html += `
+                <div class="leaderboard-item ${user.isCurrentUser ? 'current-user' : ''}" id="player-${rank}">
+                    <div class="rank-badge">${rank}</div>
+                    
+                    <div class="user-info">
+                        <div class="user-name">
+                            <span class="username-prefix">@</span>
+                            <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                ${user.name}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="winnings">
+                        <div class="winnings-amount">${formatCurrency(user.earnings)}</div>
+                        <div class="winnings-label">Winnings</div>
+                    </div>
+                    
+                    <div class="reward">
+                        <div class="reward-amount">${formatCurrency(rewardAmount)}</div>
+                        <div class="reward-label">Prize</div>
+                    </div>
+                    
+                    <div class="profile-column">
+                        <button class="profile-link" onclick="viewProfile('${user.id}')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+        });
+        
+        leaderboardList.innerHTML = html;
+    }
+
+    // View user profile
+    function viewProfile(userId) {
+        window.location.href = `view-profile.html?uid=${userId}`;
+    }
+
+    function showNoData() {
+        leaderboardList.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="fas fa-trophy"></i>
+                </div>
+                <h3>No ${formatTimeFilter(currentFilter).toLowerCase()} data yet</h3>
+                <p>Start playing tournaments to appear on the leaderboard!</p>
+            </div>
+        `;
+    }
+
+    // Finish loading UI
+    function finishLoading() {
+        skeletonContainer.style.display = 'none';
+        mainContent.style.display = 'block';
+    }
+
+    // ===============================================================
+    // INITIALIZATION
+    // ===============================================================
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Leaderboard page loaded');
+        
+        // Show skeleton initially
+        skeletonContainer.style.display = 'block';
+        mainContent.style.display = 'none';
+
+        // Load reward amounts first
+        loadRewardAmounts().then(() => {
+            // Authentication State Listener
+            auth.onAuthStateChanged(user => {
+                if (user) {
+                    USER_UID = user.uid;
+                }
+                
+                // Load leaderboard for both guests and logged-in users
+                loadLeaderboard('today').finally(() => {
+                    finishLoading();
+                });
+            });
+        });
+
+        // Connection Status Check
+        database.ref('.info/connected').on('value', function(snap) {
+            if (!snap.val()) {
+                console.warn('Database Connection Warning: Client disconnected');
+            } else {
+                console.info('Database Connection: Client connected');
+            }
+        });
+    });
+</script>
+</body>
+</html>

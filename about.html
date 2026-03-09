@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About Us - ElitePros</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+
+<style>
+    :root {
+        --bg-dark: #0b1020;
+        --card-bg: #1f2340;
+        --card-dark: #121322;
+        --accent: #3f3ef2;
+        --muted: #9aa3b2;
+        --header-bg: #111827;
+    }
+    
+    body {
+        background: var(--bg-dark);
+        color: white;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+        margin: 0;
+        padding: 0;
+        padding-bottom: 20px;
+    }
+    
+    /* Header */
+    .header-bar {
+        background: var(--header-bg);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 16px;
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    }
+    
+    .header-center {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        justify-content: center;
+        flex: 1;
+    }
+    
+    .app-logo {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 2px solid rgba(99, 102, 241, 0.5);
+    }
+    
+    .header-title {
+        font-weight: 700;
+        font-size: 1.25rem;
+        background: linear-gradient(135deg, #fff, #a5b4fc);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        letter-spacing: 0.5px;
+    }
+    
+    /* Back Button */
+    .back-btn {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #1f2937, #111827);
+        border: 1px solid rgba(255,255,255,0.1);
+        color: #cbd5e1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        flex-shrink: 0;
+    }
+    
+    .back-btn:hover {
+        background: linear-gradient(135deg, #2d3748, #1f2937);
+        color: white;
+        border-color: rgba(99, 102, 241, 0.3);
+        transform: translateX(-2px);
+    }
+    
+    .back-btn i {
+        font-size: 1.25rem;
+    }
+    
+    /* Content Container */
+    .content-container {
+        padding: 20px 16px;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    
+    /* About Card */
+    .about-card {
+        background: linear-gradient(135deg, #1f2340 0%, #121322 100%);
+        border-radius: 20px;
+        padding: 24px;
+        margin-bottom: 20px;
+        border: 1px solid rgba(255,255,255,0.1);
+        box-shadow: 0 10px 40px rgba(2,6,23,0.8);
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .about-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 50px rgba(63, 62, 242, 0.3);
+        border-color: rgba(63, 62, 242, 0.3);
+    }
+    
+    .about-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(135deg, #facc15, #f59e0b);
+        border-radius: 20px 20px 0 0;
+    }
+    
+    .about-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 20px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .about-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #3f3ef2, #6366f1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: white;
+        box-shadow: 0 4px 15px rgba(63, 62, 242, 0.4);
+    }
+    
+    .about-title {
+        font-weight: 800;
+        font-size: 1.75rem;
+        background: linear-gradient(135deg, #fff, #a5b4fc);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        letter-spacing: 0.5px;
+    }
+    
+    /* About Content */
+    .about-content {
+        color: #e5e7eb;
+        line-height: 1.8;
+        font-size: 1rem;
+    }
+    
+    .about-content h2 {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #facc15;
+        margin: 20px 0 10px 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .about-content h2 i {
+        color: #3f3ef2;
+        font-size: 1rem;
+    }
+    
+    .about-content p {
+        margin-bottom: 15px;
+        color: #cbd5e1;
+    }
+    
+    /* Skeleton Loader */
+    .skeleton-container {
+        padding: 20px 16px;
+    }
+    
+    .skeleton-shimmer {
+        background: linear-gradient(90deg, 
+            rgba(255, 255, 255, 0.05) 25%, 
+            rgba(255, 255, 255, 0.1) 50%, 
+            rgba(255, 255, 255, 0.05) 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite;
+        border-radius: 8px;
+    }
+    
+    @keyframes shimmer {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+    }
+    
+    .skeleton-title {
+        height: 32px;
+        width: 200px;
+        margin-bottom: 20px;
+    }
+    
+    .skeleton-content {
+        height: 300px;
+        border-radius: 20px;
+    }
+    
+    /* Loading Container */
+    .loading-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 300px;
+        padding: 40px 20px;
+    }
+    
+    .loading-spinner {
+        width: 60px;
+        height: 60px;
+        border: 3px solid rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        border-top-color: #3f3ef2;
+        animation: spin 1s ease-in-out infinite;
+        margin-bottom: 20px;
+    }
+    
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+    
+    .loading-text {
+        color: #9ca3af;
+        font-size: 1rem;
+        font-weight: 600;
+    }
+</style>
+</head>
+<body>
+
+    <!-- Header -->
+    <div class="header-bar">
+        <button class="back-btn" onclick="goBack()">
+            <i class="fas fa-arrow-left"></i>
+        </button>
+        
+        <div class="header-center">
+            <div class="app-logo">
+                <img id="appLogo" src="https://i.ibb.co/Y7SksQy9/IMG-20250830-082315-071.jpg" alt="ElitePros" style="width:100%;height:100%;object-fit:cover;">
+            </div>
+            <div class="header-title">About ElitePros</div>
+        </div>
+        
+        <div style="width: 44px;"></div>
+    </div>
+
+    <!-- Skeleton Loader -->
+    <div id="skeletonContainer" class="skeleton-container">
+        <div class="skeleton-title skeleton-shimmer"></div>
+        <div class="skeleton-content skeleton-shimmer"></div>
+    </div>
+
+    <!-- Loading Container -->
+    <div id="loadingContainer" class="loading-container" style="display: none;">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Loading About Us...</div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="mainContent" class="content-container" style="display: none;">
+        <div class="about-card">
+            <div class="about-header">
+                <div class="about-icon">
+                    <i class="fas fa-circle-info"></i>
+                </div>
+                <div class="about-title">About ElitePros</div>
+            </div>
+            
+            <div class="about-content" id="aboutContent">
+                <!-- Content will be loaded dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ====================================================================
+        // FIREBASE CONFIGURATION
+        // ====================================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyC86fii3isDnSOof71h_18PdZehzCEFIFw",
+            authDomain: "eliteprosofficial.firebaseapp.com",
+            databaseURL: "https://eliteprosofficial-default-rtdb.firebaseio.com",
+            projectId: "eliteprosofficial",
+            storageBucket: "eliteprosofficial.firebasestorage.app",
+            messagingSenderId: "646561207100",
+            appId: "1:646561207100:web:47de7b648695367e208439",
+            measurementId: "G-ZN5VNFCSEL"
+        };
+        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // DOM Elements
+        const skeletonContainer = document.getElementById('skeletonContainer');
+        const loadingContainer = document.getElementById('loadingContainer');
+        const mainContent = document.getElementById('mainContent');
+        const aboutContent = document.getElementById('aboutContent');
+
+        // Navigation Function
+        function goBack() {
+            if (history.length > 1) {
+                history.back();
+            } else {
+                window.location.href = 'home.html';
+            }
+        }
+
+        // Load About Content from Firebase
+        function loadAboutContent() {
+            skeletonContainer.style.display = 'none';
+            loadingContainer.style.display = 'flex';
+            mainContent.style.display = 'none';
+            
+            database.ref('pageContent/about').once('value')
+                .then(snapshot => {
+                    const contentData = snapshot.val();
+                    
+                    if (contentData && contentData.content) {
+                        displayAboutContent(contentData.content);
+                    } else {
+                        displayDefaultContent();
+                    }
+                    
+                    loadingContainer.style.display = 'none';
+                    mainContent.style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Error loading about content:', error);
+                    displayDefaultContent();
+                    loadingContainer.style.display = 'none';
+                    mainContent.style.display = 'block';
+                });
+        }
+
+        function displayAboutContent(content) {
+            const lines = content.split('\n');
+            let formattedContent = '';
+            
+            lines.forEach(line => {
+                line = line.trim();
+                if (line) {
+                    // Check for section titles
+                    if (/^[A-Z][a-z\s]+$/.test(line) && line.length < 30) {
+                        formattedContent += `<h2><i class="fas fa-star"></i> ${line}</h2>`;
+                    } else {
+                        formattedContent += `<p>${line}</p>`;
+                    }
+                }
+            });
+            
+            aboutContent.innerHTML = formattedContent || '<p>No about content available.</p>';
+        }
+
+        function displayDefaultContent() {
+            const defaultContent = `
+                <h2><i class="fas fa-users"></i> Who We Are</h2>
+                <p>ElitePros is a premier esports platform dedicated to connecting competitive gamers worldwide. We strive to provide a fair, fun, and engaging environment for players of all levels.</p>
+                
+                <h2><i class="fas fa-bullseye"></i> Our Mission</h2>
+                <p>Our mission is to empower gamers by providing a secure and transparent platform for tournaments, leaderboards, and rewards. ElitePros believes in promoting fair play, skill, and community growth.</p>
+                
+                <h2><i class="fas fa-eye"></i> Our Vision</h2>
+                <p>We envision a gaming ecosystem where every player can showcase their talent, earn rewards, and grow their reputation. ElitePros aims to become the most trusted platform for competitive gaming.</p>
+                
+                <h2><i class="fas fa-check-circle"></i> Why Choose ElitePros</h2>
+                <p>ElitePros combines advanced technology, fair tournament management, real-time leaderboards, and secure payment methods. We prioritize player satisfaction and ensure transparency in every aspect of our platform.</p>
+                
+                <h2><i class="fas fa-handshake"></i> Get Involved</h2>
+                <p>Join tournaments, participate in community events, or follow us on social media to stay updated with the latest competitions and rewards. ElitePros welcomes gamers who share our passion for esports.</p>
+            `;
+            
+            aboutContent.innerHTML = defaultContent;
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            skeletonContainer.style.display = 'block';
+            loadingContainer.style.display = 'none';
+            mainContent.style.display = 'none';
+            
+            setTimeout(() => {
+                loadAboutContent();
+            }, 300);
+        });
+    </script>
+</body>
+</html>
