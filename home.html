@@ -731,24 +731,25 @@
         }
         
         /* Account Options Grid */
-        .options-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            margin: 0 16px 24px;
-        }
+        .options-grid{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:12px;
+margin:0 16px 24px;
+}
+
         
-        /* Mobile responsiveness for account options - 1 column on small screens */
-        @media (max-width: 420px) {
-            .options-grid {
-                grid-template-columns: 1fr;
-            }
-        }
+        /* small phones */
+@media (max-width:520px){
+
+.options-grid{
+grid-template-columns:1fr;
+}
         
         .option-card {
             background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
             border-radius: 16px;
-            padding: 16px;
+            padding: 14px 12px;
             border: 1.5px solid transparent;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -785,7 +786,7 @@
         
         .option-title {
             font-weight: 700;
-            font-size: 13px;
+            font-size: 14px;
             color: #e5e7eb;
         }
         
