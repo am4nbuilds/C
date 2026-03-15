@@ -96,60 +96,151 @@
             background: rgba(255,255,255,0.15);
         }
 
-        /* glass card style - updated to match tournaments.html */
-        .glass-card {
-            background: linear-gradient(135deg, #1f2340 0%, #121322 100%);
-            border-radius: 16px;
-            border: 1px solid rgba(255,255,255,0.08);
-            box-shadow: 0 8px 30px rgba(2,6,23,0.7);
-            padding: 12px 14px;
-            margin: 16px;
+        /* ---------- tournament card exact match (from tournaments.html) ---------- */
+        .tournament-card { 
+            border-radius: 16px; 
+            overflow: hidden; 
+            background: linear-gradient(135deg, #1f2340 0%, #121322 100%); 
+            border: 1px solid rgba(255,255,255,0.08); 
+            box-shadow: 0 8px 30px rgba(2,6,23,0.7); 
+            margin: 16px 16px; 
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
         }
 
-        /* STAT GRID - exact match from tournaments.html */
+        .banner-container { 
+            position: relative;
+            width: 100%;
+            height: 200px;
+            overflow: hidden;
+            background: #0b1020;
+        }
+        .banner-container img { 
+            width: 100%; 
+            height: 100%; 
+            display: block; 
+            object-fit: cover;
+            object-position: center;
+        }
+
+        /* status badge removed (no OPEN tag) */
+
+        .details { 
+            background: var(--card-bg); 
+            padding: 18px;
+            border-top-left-radius: 16px; 
+            border-top-right-radius: 16px; 
+            position: relative;
+            margin-top: -16px;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-bottom: none;
+        }
+        
+        .org-icon { 
+            width: 50px; 
+            height: 50px; 
+            border-radius: 50%; 
+            display: inline-flex; 
+            align-items: center; 
+            justify-content: center; 
+            background: #0b1226; 
+            border: 2px solid rgba(255,255,255,0.1);
+            flex-shrink: 0;
+        }
+        
+        .org-icon img {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        
+        .title-row { 
+            display: flex; 
+            gap: 12px; 
+            align-items: flex-start; 
+            margin-bottom: 14px;
+        }
+        
+        .title-left { flex: 1; }
+        .title-h { font-size: 16px; font-weight: 800; color: #ffffff; line-height: 1.2; margin-bottom: 6px; }
+        
+        .match-info-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+        
+        .match-id {
+            color: #a5b4fc;
+            font-weight: 600;
+            font-size: 12px;
+            background: rgba(165, 180, 252, 0.1);
+            padding: 3px 8px;
+            border-radius: 6px;
+        }
+
+        .schedule-box {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255,255,255,0.05);
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #e5e7eb;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .schedule-icon { color: #f59e0b; }
+
+        /* STAT GRID - exact match */
         .stat-grid { 
             display: grid; 
             grid-template-columns: repeat(3,1fr); 
-            gap: 8px;
-            margin: 8px 0;
+            gap: 12px; 
+            margin: 16px 0;
         }
         
-        .stat-item {
+        .stat {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             text-align: center;
-            min-height: 55px;
+            min-height: 70px;
             background: rgba(255,255,255,0.03);
-            border-radius: 8px;
-            padding: 6px 2px;
+            border-radius: 10px;
+            padding: 8px 4px;
         }
         
-        .stat-label { 
-            font-size: 9px;
+        .stat .label { 
+            font-size: 10px; 
             color: var(--muted); 
             text-transform: uppercase; 
             font-weight: 600; 
-            margin-bottom: 3px;
+            margin-bottom: 6px;
         }
         
-        .stat-value { 
+        .stat .val { 
             font-weight: 800; 
             color: white; 
             display: inline-flex; 
             align-items: center; 
-            justify-content: center;
-            gap: 4px;
-            font-size: 12px;
+            justify-content: center; 
+            gap: 6px; 
+            font-size: 14px;
         }
 
-        /* SMALL GRID - exact match from tournaments.html */
+        /* SMALL GRID (4 columns: MAP, TYPE, PLATFORM) — removed TIME cell */
         .small-grid { 
             display: grid; 
-            grid-template-columns: repeat(4,1fr); 
-            gap: 8px;
-            margin: 8px 0;
+            grid-template-columns: repeat(3,1fr); 
+            gap: 12px; 
+            margin: 14px 0;
         }
         
         .small-grid > div {
@@ -158,22 +249,22 @@
             align-items: center;
             justify-content: center;
             text-align: center;
-            min-height: 45px;
+            min-height: 60px;
             background: rgba(255,255,255,0.02);
-            border-radius: 6px;
-            padding: 4px 2px;
+            border-radius: 8px;
+            padding: 6px 2px;
         }
         
         .small-grid .slabel { 
-            font-size: 9px;
+            font-size: 10px; 
             color: var(--muted); 
             display: flex; 
             align-items: center; 
             justify-content: center; 
-            gap: 3px;
+            gap: 4px; 
             text-transform: uppercase; 
             font-weight: 600;
-            margin-bottom: 2px;
+            margin-bottom: 4px;
         }
         
         .small-grid .sval { 
@@ -182,10 +273,11 @@
             display: flex; 
             align-items: center; 
             justify-content: center; 
-            gap: 4px;
-            font-size: 11px;
+            gap: 6px; 
+            font-size: 13px;
         }
 
+        /* Wallet mini card */
         .wallet-mini-card {
             background: linear-gradient(135deg, #1f2340, #121322);
             border-radius: 20px;
@@ -223,20 +315,7 @@
             font-size: 26px; font-weight: 800; color: white; margin-top: 4px;
         }
 
-        .progress-container {
-            height: 12px; background: #0b1226; border-radius: 999px; margin: 16px; overflow: hidden;
-            border: 1px solid #3f3ef2;
-        }
-
-        .progress-fill {
-            height: 100%; background: linear-gradient(90deg,#3f3ef2,#06b6d4); width: 0%;
-            transition: width 0.4s ease;
-        }
-
-        .slots-text {
-            text-align: center; font-size: 13px; color: #cbd5e1; margin-top: -8px; margin-bottom: 16px;
-        }
-
+        /* IGN input */
         .input-card {
             margin: 16px;
         }
@@ -253,6 +332,13 @@
 
         .input-card input:focus {
             border-color: #3f3ef2; box-shadow: 0 0 0 3px rgba(63,62,242,0.3);
+        }
+        /* validation message */
+        .validation-msg {
+            color: #f87171;
+            font-size: 12px;
+            margin-top: 6px;
+            margin-left: 8px;
         }
 
         .join-btn {
@@ -272,7 +358,7 @@
         .join-btn.warning { background: linear-gradient(90deg,#f59e0b,#d97706); box-shadow: 0 8px 20px rgba(245,158,11,0.3); }
         .join-btn.error { background: linear-gradient(90deg,#ef4444,#dc2626); box-shadow: 0 8px 20px rgba(239,68,68,0.3); }
 
-        /* full-screen modal (professional cover) */
+        /* modal (unchanged) */
         .modal-bg {
             position: fixed; inset:0; background: rgba(0,0,0,0.9); backdrop-filter: blur(12px);
             display: none; align-items: center; justify-content: center; z-index: 1000;
@@ -311,22 +397,69 @@
             display: flex; gap: 10px; flex-direction: column;
         }
 
-        /* skeleton shimmer */
-        .skeleton {
-            background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
-            background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 16px;
+        /* ----- SIMPLE GREY SHIMMER SKELETON (no gradient colors) ----- */
+        .skeleton-shimmer {
+            background: #2a2f4b;  /* solid dark base */
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .skeleton-shimmer::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                rgba(255,255,255,0.02) 0%, 
+                rgba(255,255,255,0.08) 20%, 
+                rgba(255,255,255,0.02) 40%,
+                rgba(255,255,255,0.02) 100%);
+            background-size: 200% 100%;
+            animation: simpleShimmer 1.8s infinite;
+            border-radius: 8px;
         }
 
-        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        @keyframes simpleShimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
 
-        .skeleton-card { height: 160px; margin: 16px; }
-        .skeleton-progress { height: 40px; margin: 16px; border-radius: 40px; }
-        .skeleton-input { height: 68px; margin: 16px; border-radius: 20px; }
-        .skeleton-btn { height: 62px; margin: 16px; border-radius: 30px; }
+        /* banner skeleton */
+        .skeleton-banner {
+            width: 100%;
+            height: 200px;
+            background: #1e2436;
+        }
+
+        /* inline skeleton for text */
+        .skeleton-text {
+            display: inline-block;
+            height: 1em;
+            width: 80px;
+            background: #2a2f4b;
+            border-radius: 4px;
+            vertical-align: middle;
+        }
+        .skeleton-text-small {
+            width: 50px;
+            height: 0.9em;
+        }
+        .skeleton-text-large {
+            width: 120px;
+            height: 1.2em;
+        }
+        /* hide skeleton after load */
+        .hide-skeleton .skeleton-shimmer,
+        .hide-skeleton .skeleton-banner,
+        .hide-skeleton .skeleton-text {
+            display: none !important;
+        }
 
         .hidden { display: none; }
 
-        /* match id chip style */
+        /* room details chip */
         .match-id-chip {
             color: #a5b4fc;
             font-weight: 600;
@@ -344,81 +477,74 @@
         <button class="back-btn" id="backBtn"><i class="fa fa-arrow-left"></i></button>
         <div class="centered-logo-inline-container">
             <div class="app-logo-header">
-                <!-- Logo source /logo.png (current domain root) -->
-                <img src="/logo.png" alt="ElitePros" style="width:100%;height:100%;object-fit:cover;">
+                <img src="/logo.png" alt="ElitePros" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">
             </div>
             <div class="centered-logo-inline-label">Join Match</div>
         </div>
         <div style="width:44px;"></div>
     </div>
 
-    <!-- skeleton loading (visible initially) -->
-    <div id="skeletonWrapper">
-        <div class="skeleton skeleton-card"></div>
-        <div class="skeleton skeleton-card" style="height:100px;"></div>
-        <div class="skeleton skeleton-progress"></div>
-        <div class="skeleton skeleton-input"></div>
-        <div class="skeleton skeleton-btn"></div>
-    </div>
-
-    <!-- main content (hidden until loaded) -->
-    <div id="mainContent" style="display:none;">
-        <!-- match card - UPDATED to match tournaments.html design -->
-        <div class="glass-card" id="matchCard">
-            <div class="flex items-center gap-2 mb-3">
-                <div class="match-id-chip" id="matchId">#...</div>
-                <span class="bg-blue-600/30 text-blue-300 text-xs px-3 py-1 rounded-full ml-auto" id="matchStatusBadge">open</span>
+    <!-- main content (always visible structure, with skeleton placeholders inside values) -->
+    <div id="mainContent">
+        <!-- tournament card exactly like tournaments.html -->
+        <div class="tournament-card">
+            <!-- banner container with skeleton -->
+            <div class="banner-container" id="bannerWrapper">
+                <img id="matchBanner" src="" alt="tournament banner" style="display:none;" onerror="this.src='https://via.placeholder.com/720x1680?text=No+Banner';" />
             </div>
-            
-            <div class="text-lg font-extrabold text-white mb-2" id="matchTitle">-</div>
+            <div class="details">
+                <div class="title-row">
+                    <div class="org-icon"><img src="https://i.ibb.co/Y7SksQy9/IMG-20250830-082315-071.jpg" alt="org" onerror="this.src='https://via.placeholder.com/50';" /></div>
+                    <div class="title-left">
+                        <div class="title-h" id="matchName">-</div>
+                        <!-- match info row: ID + time (exactly like tournaments) -->
+                        <div class="match-info-row">
+                            <div class="match-id" id="matchIdContainer">
+                                ID: <span id="matchIdValue"><span class="skeleton-text skeleton-shimmer"></span></span>
+                            </div>
+                            <div class="schedule-box">
+                                <i class="fa-solid fa-clock schedule-icon"></i>
+                                <div id="matchTimeValue"><span class="skeleton-text skeleton-shimmer"></span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-            <!-- STAT GRID - exact match from tournaments.html -->
-            <div class="stat-grid">
-                <div class="stat-item">
-                    <div class="stat-label"><i class="fa-solid fa-trophy text-yellow-400 mr-1"></i>PRIZE POOL</div>
-                    <div class="stat-value text-yellow-400" id="prizePool">₹0</div>
+                <!-- STAT GRID: prize, kill, entry -->
+                <div class="stat-grid">
+                    <div class="stat"><div class="label"><i class="fa-solid fa-trophy text-yellow-400 mr-1"></i>PRIZE POOL</div><div class="val" id="prizePoolValue"><span class="skeleton-text skeleton-shimmer"></span></div></div>
+                    <div class="stat"><div class="label"><i class="fa-solid fa-skull text-red-400 mr-1"></i>PER KILL</div><div class="val" id="perKillValue"><span class="skeleton-text skeleton-shimmer"></span></div></div>
+                    <div class="stat"><div class="label"><i class="fa-solid fa-coins text-yellow-400 mr-1"></i>ENTRY FEE</div><div class="val" id="entryFeeValue"><span class="skeleton-text skeleton-shimmer"></span></div></div>
                 </div>
-                <div class="stat-item">
-                    <div class="stat-label"><i class="fa-solid fa-skull text-red-400 mr-1"></i>PER KILL</div>
-                    <div class="stat-value text-red-400" id="perKill">₹0</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-label"><i class="fa-solid fa-coins text-yellow-400 mr-1"></i>ENTRY FEE</div>
-                    <div class="stat-value text-yellow-400" id="entryFee">₹0</div>
-                </div>
-            </div>
 
-            <!-- SMALL GRID - Time, Map, Type, Platform (4 columns) -->
-            <div class="small-grid">
-                <div>
-                    <div class="slabel"><i class="fa-regular fa-clock"></i> TIME</div>
-                    <div class="sval" id="matchTime">-</div>
+                <!-- SMALL GRID (3 columns: map, type, platform) — time removed -->
+                <div class="small-grid">
+                    <div>
+                        <div class="slabel"><i class="fa-solid fa-map"></i> MAP</div>
+                        <div class="sval" id="mapValue"><span class="skeleton-text skeleton-shimmer"></span></div>
+                    </div>
+                    <div>
+                        <div class="slabel"><i class="fa-solid fa-users"></i> TYPE</div>
+                        <div class="sval" id="typeValue"><span class="skeleton-text skeleton-shimmer"></span></div>
+                    </div>
+                    <div>
+                        <div class="slabel"><i class="fa-solid fa-gamepad"></i> PLATFORM</div>
+                        <div class="sval" id="platformValue"><span class="skeleton-text skeleton-shimmer"></span></div>
+                    </div>
                 </div>
-                <div>
-                    <div class="slabel"><i class="fa-solid fa-map"></i> MAP</div>
-                    <div class="sval" id="matchMap">-</div>
-                </div>
-                <div>
-                    <div class="slabel"><i class="fa-solid fa-users"></i> TYPE</div>
-                    <div class="sval" id="matchType">-</div>
-                </div>
-                <div>
-                    <div class="slabel"><i class="fa-solid fa-gamepad"></i> PLATFORM</div>
-                    <div class="sval" id="matchPlatform">-</div>
-                </div>
-            </div>
 
-            <!-- Room details if available -->
-            <div id="roomDetails" class="mt-4 p-3 bg-blue-600/20 rounded-xl border border-blue-500/30 hidden">
-                <div class="text-xs text-blue-300 mb-1">ROOM DETAILS</div>
-                <div class="grid grid-cols-2 gap-2">
-                    <div><span class="text-gray-400">ID:</span> <span class="font-mono" id="roomId">-</span></div>
-                    <div><span class="text-gray-400">PASS:</span> <span class="font-mono" id="roomPass">-</span></div>
+                <!-- room details (hidden initially) -->
+                <div id="roomDetails" class="mt-4 p-3 bg-blue-600/20 rounded-xl border border-blue-500/30 hidden">
+                    <div class="text-xs text-blue-300 mb-1">ROOM DETAILS</div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div><span class="text-gray-400">ID:</span> <span class="font-mono" id="roomId">-</span></div>
+                        <div><span class="text-gray-400">PASS:</span> <span class="font-mono" id="roomPass">-</span></div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- wallet mini card -->
+        <!-- wallet mini card (static) -->
         <div class="wallet-mini-card">
             <div class="wallet-icon"><i class="fa-solid fa-wallet"></i></div>
             <div class="balance-info">
@@ -427,23 +553,20 @@
             </div>
         </div>
 
-        <!-- slots progress -->
-        <div class="progress-container">
-            <div class="progress-fill" id="slotsProgress"></div>
-        </div>
-        <div class="slots-text" id="slotsText">0 / 0 slots</div>
-
-        <!-- IGN input -->
+        <!-- IGN input with validation -->
         <div class="input-card">
             <label><i class="fa-regular fa-id-card mr-2"></i> IN-GAME NAME (IGN)</label>
-            <input type="text" id="ignInput" placeholder="Enter your IGN" autocomplete="off" />
+            <input type="text" id="ignInput" placeholder="Enter your IGN" 
+                   minlength="1" maxlength="15" pattern="[A-Za-z0-9 ]+" 
+                   autocomplete="off" />
+            <div class="validation-msg hidden" id="ignValidation">Only letters, numbers and spaces allowed (1-15 chars)</div>
         </div>
 
         <!-- join button (dynamic) -->
         <button class="join-btn" id="joinBtn" disabled><i class="fa-solid fa-circle-notch fa-spin"></i> LOADING...</button>
     </div>
 
-    <!-- full-screen modal (professional) -->
+    <!-- full-screen modal (unchanged) -->
     <div class="modal-bg" id="statusModal">
         <div class="modal-card">
             <div class="modal-icon success" id="modalIcon"><i class="fa-solid fa-circle-check"></i></div>
@@ -457,11 +580,11 @@
 
     <script>
         (function() {
-            // ---------- CONFIG ----------
+            // ---------- CONFIG (identical, untouched) ----------
             const FIREBASE_CONFIG = {
                 apiKey: "AIzaSyC86fii3isDnSOof71h_18PdZehzCEFIFw",
                 authDomain: "eliteprosofficial.firebaseapp.com",
-                databaseURL: "https://eliteprosofficial-default-rtdb.firebaseio.com", // kept but unused
+                databaseURL: "https://eliteprosofficial-default-rtdb.firebaseio.com",
                 projectId: "eliteprosofficial",
                 storageBucket: "eliteprosofficial.firebasestorage.app",
                 messagingSenderId: "646561207100",
@@ -469,7 +592,6 @@
             };
             firebase.initializeApp(FIREBASE_CONFIG);
             const auth = firebase.auth();
-            // NO database
 
             const BACKEND_URL = "https://elitepros-backend.onrender.com";
             const JOIN_ENDPOINT = `${BACKEND_URL}/join-match`;
@@ -487,17 +609,17 @@
 
             // ---------- GLOBALS ----------
             let currentUser = null;
-            let currentMatch = null;          // from backend API
-            let joinStatus = 'idle';           // idle, joined, full, insufficient, alreadyjoined, error
+            let currentMatch = null;
+            let joinStatus = 'idle';
             let userBalance = 0;
-            let joinedCount = 0;                // from backend joinedCount
+            let joinedCount = 0;
 
             // DOM elements
-            const skeleton = document.getElementById('skeletonWrapper');
             const mainContent = document.getElementById('mainContent');
             const backBtn = document.getElementById('backBtn');
             const joinBtn = document.getElementById('joinBtn');
             const ignInput = document.getElementById('ignInput');
+            const ignValidation = document.getElementById('ignValidation');
             const modal = document.getElementById('statusModal');
             const modalIconDiv = document.getElementById('modalIcon');
             const modalTitle = document.getElementById('modalTitle');
@@ -505,7 +627,39 @@
             const modalButtonGroup = document.getElementById('modalButtonGroup');
             const roomDetails = document.getElementById('roomDetails');
 
-            // ---------- HELPER: show full screen modal with custom actions ----------
+            // banner
+            const matchBanner = document.getElementById('matchBanner');
+            const bannerWrapper = document.getElementById('bannerWrapper');
+
+            // text fields
+            const matchIdValue = document.getElementById('matchIdValue');
+            const matchTimeValue = document.getElementById('matchTimeValue');
+            const matchName = document.getElementById('matchName');
+            const prizePoolValue = document.getElementById('prizePoolValue');
+            const perKillValue = document.getElementById('perKillValue');
+            const entryFeeValue = document.getElementById('entryFeeValue');
+            const mapValue = document.getElementById('mapValue');
+            const typeValue = document.getElementById('typeValue');
+            const platformValue = document.getElementById('platformValue');
+            const totalBalanceSpan = document.getElementById('totalBalance');
+
+            // Helper: remove skeletons from dynamic fields (just clear inner html, will be replaced)
+            function clearSkeletons() {
+                // replace skeleton spans with empty, then fill with actual data
+                matchIdValue.innerHTML = ''; 
+                matchTimeValue.innerHTML = '';
+                prizePoolValue.innerHTML = '';
+                perKillValue.innerHTML = '';
+                entryFeeValue.innerHTML = '';
+                mapValue.innerHTML = '';
+                typeValue.innerHTML = '';
+                platformValue.innerHTML = '';
+                // banner: hide skeleton by showing image
+                matchBanner.style.display = 'block';
+                // remove any artificial skeleton background (banner bg is already dark)
+            }
+
+            // showModal unchanged
             function showModal(type, title, msg, buttons = [{ text: 'OK', action: 'close' }]) {
                 modalIconDiv.className = 'modal-icon ' + type;
                 let icon = 'fa-circle-check';
@@ -525,7 +679,7 @@
                         modal.style.display = 'none';
                         if (btn.action === 'redirect' && btn.url) window.location.href = btn.url;
                         else if (btn.action === 'back') window.history.back();
-                        else if (btn.action === 'close') { /* just close */ }
+                        else if (btn.action === 'close') { }
                         else if (typeof btn.action === 'function') btn.action();
                     };
                     modalButtonGroup.appendChild(button);
@@ -534,20 +688,12 @@
                 modal.style.display = 'flex';
             }
 
-            // Format date/time from scheduleTime (ISO string) - matches tournaments.html format
             function formatDateTime(timestamp) {
                 if (!timestamp) return 'N/A';
                 const date = new Date(timestamp);
-                return date.toLocaleString('en-IN', { 
-                    day: '2-digit', 
-                    month: 'short', 
-                    hour: '2-digit', 
-                    minute: '2-digit',
-                    hour12: true 
-                });
+                return date.toLocaleString('en-IN', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit', hour12:true });
             }
 
-            // Get type icon based on match type
             function getTypeIcon(type) {
                 type = (type || 'solo').toLowerCase();
                 if (type === 'duo') return '<i class="fa-solid fa-user-group text-blue-400"></i>';
@@ -555,43 +701,31 @@
                 return '<i class="fa-solid fa-user text-blue-400"></i>';
             }
 
-            // ---------- UI update from match (backend) ----------
+            // ---------- UI update from match ----------
             function updateUI() {
                 if (!currentMatch) return;
 
-                joinedCount = currentMatch.joinedCount || 0;
-                const totalSlots = Number(currentMatch.slots || 100);
-                const isFull = joinedCount >= totalSlots;
+                // clear all skeleton placeholders
+                clearSkeletons();
 
-                // Display public matchId from match object, not Firebase ID
-                document.getElementById('matchId').innerText = `#${currentMatch.matchId || matchId.slice(0,8)}`;
-                document.getElementById('matchTitle').innerText = currentMatch.name || 'Match';
-                document.getElementById('prizePool').innerHTML = `₹${(currentMatch.prizePool || 0).toLocaleString()}`;
-                document.getElementById('perKill').innerHTML = `₹${(currentMatch.perKill || 0)}`;
-                document.getElementById('entryFee').innerHTML = `₹${(currentMatch.entryFee || 0)}`;
-
-                // Time, Map, Type, Platform with icons
-                document.getElementById('matchTime').innerHTML = formatDateTime(currentMatch.scheduleTime) || 'N/A';
-                document.getElementById('matchMap').innerHTML = currentMatch.map || 'N/A';
+                // banner
+                matchBanner.src = currentMatch.banner || 'https://via.placeholder.com/720x1680?text=No+Banner';
                 
+                matchName.innerText = currentMatch.name || 'Match';
+                matchIdValue.innerText = currentMatch.matchId || matchId.slice(0,8);
+                matchTimeValue.innerText = formatDateTime(currentMatch.scheduleTime) || 'N/A';
+
+                prizePoolValue.innerHTML = `₹${(currentMatch.prizePool || 0).toLocaleString()}`;
+                perKillValue.innerHTML = `₹${(currentMatch.perKill || 0)}`;
+                entryFeeValue.innerHTML = `₹${(currentMatch.entryFee || 0)}`;
+
+                mapValue.innerText = currentMatch.map || 'N/A';
                 const typeIcon = getTypeIcon(currentMatch.type);
-                document.getElementById('matchType').innerHTML = `${typeIcon}<span>${(currentMatch.type || 'SOLO').toUpperCase()}</span>`;
-                
-                const platformIcon = '<i class="fa-solid fa-mobile-screen-button text-green-400"></i>';
-                document.getElementById('matchPlatform').innerHTML = `${platformIcon}<span>${currentMatch.platform || 'Phone'}</span>`;
+                typeValue.innerHTML = `${typeIcon}<span>${(currentMatch.type || 'SOLO').toUpperCase()}</span>`;
+                platformValue.innerHTML = `<i class="fa-solid fa-mobile-screen-button text-green-400"></i><span>${currentMatch.platform || 'Phone'}</span>`;
 
-                // Status badge
-                const statusBadge = document.getElementById('matchStatusBadge');
-                if (isFull) {
-                    statusBadge.innerText = 'FULL';
-                    statusBadge.className = 'bg-red-600/30 text-red-300 text-xs px-3 py-1 rounded-full';
-                } else {
-                    statusBadge.innerText = 'OPEN';
-                    statusBadge.className = 'bg-blue-600/30 text-blue-300 text-xs px-3 py-1 rounded-full';
-                }
-
-                // Room details (only if full/started and fields exist)
-                if (currentMatch.roomId && currentMatch.roomPass && (isFull || currentMatch.status === 'started')) {
+                // Room details (if any)
+                if (currentMatch.roomId && currentMatch.roomPass) {
                     roomDetails.classList.remove('hidden');
                     document.getElementById('roomId').innerText = currentMatch.roomId || '-';
                     document.getElementById('roomPass').innerText = currentMatch.roomPass || '-';
@@ -599,15 +733,7 @@
                     roomDetails.classList.add('hidden');
                 }
 
-                // Slots progress
-                const percent = Math.min(100, (joinedCount / totalSlots) * 100);
-                document.getElementById('slotsProgress').style.width = percent + '%';
-                document.getElementById('slotsText').innerText = `${joinedCount} / ${totalSlots} slots filled`;
-
-                // If match is full, update joinStatus
-                if (isFull && joinStatus !== 'joined' && joinStatus !== 'alreadyjoined' && joinStatus !== 'error') {
-                    joinStatus = 'full';
-                }
+                // No slots display
 
                 renderJoinButton();
             }
@@ -622,14 +748,8 @@
                     joinBtn.innerHTML = '<i class="fa-solid fa-check-circle"></i> ALREADY JOINED';
                     joinBtn.classList.add('success');
                     joinBtn.disabled = true;
-                    
-                    if (currentMatch.roomId && currentMatch.roomPass) {
-                        roomDetails.classList.remove('hidden');
-                        document.getElementById('roomId').innerText = currentMatch.roomId || '-';
-                        document.getElementById('roomPass').innerText = currentMatch.roomPass || '-';
-                    }
                 }
-                else if (joinStatus === 'full' || joinedCount >= (currentMatch.slots || 100)) {
+                else if (joinStatus === 'full' || (currentMatch.joinedCount || 0) >= (currentMatch.slots || 100)) {
                     joinBtn.innerHTML = '<i class="fa-solid fa-ban"></i> MATCH FULL';
                     joinBtn.classList.add('error');
                     joinBtn.disabled = true;
@@ -660,16 +780,14 @@
                 }
             }
 
-            // ---------- FETCH WALLET SUMMARY (and set balance) ----------
+            // Wallet fetch
             async function fetchWalletSummary(token) {
                 try {
-                    const res = await fetch(WALLET_SUMMARY_ENDPOINT, {
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    });
+                    const res = await fetch(WALLET_SUMMARY_ENDPOINT, { headers: { 'Authorization': `Bearer ${token}` }});
                     if (res.ok) {
                         const data = await res.json();
                         userBalance = data.balance || 0;
-                        document.getElementById('totalBalance').innerText = `₹${userBalance.toFixed(2)}`;
+                        totalBalanceSpan.innerText = `₹${userBalance.toFixed(2)}`;
                         
                         if (currentMatch && joinStatus === 'idle' && !currentMatch.isJoined) {
                             if (userBalance < (currentMatch.entryFee || 0)) {
@@ -678,42 +796,27 @@
                             }
                         }
                     }
-                } catch (err) {
-                    console.error('wallet fetch error', err);
-                }
+                } catch (err) { console.error('wallet error', err); }
             }
 
-            // ---------- FETCH MATCH DETAILS FROM BACKEND (only upcoming) ----------
+            // Fetch match details
             async function fetchMatchDetails(token) {
                 try {
-                    const res = await fetch(MATCH_DETAILS_ENDPOINT(matchId), {
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    });
+                    const res = await fetch(MATCH_DETAILS_ENDPOINT(matchId), { headers: { 'Authorization': `Bearer ${token}` }});
                     if (!res.ok) {
-                        if (res.status === 404) {
-                            showModal('error', 'Match not found', 'This match no longer exists.', [{
-                                text: 'OK', action: 'redirect', url: 'tournaments.html'
-                            }]);
-                        } else {
-                            throw new Error('Failed to fetch match');
-                        }
+                        if (res.status === 404) showModal('error', 'Not found', 'Match no longer exists.', [{ text:'OK', action:'redirect', url:'tournaments.html' }]);
+                        else throw new Error();
                         return;
                     }
                     currentMatch = await res.json();
 
-                    // Ensure only upcoming matches (status must not be 'completed' or 'live')
                     if (currentMatch.status === 'completed' || currentMatch.status === 'live' || currentMatch.status === 'started') {
-                        showModal('error', 'Match unavailable', 'This match has already started or finished.', [{
-                            text: 'BACK', action: 'redirect', url: redirectUrl
-                        }]);
+                        showModal('error', 'Match unavailable', 'Already started/finished.', [{ text:'BACK', action:'redirect', url:redirectUrl }]);
                         return;
                     }
                     
-                    if (currentMatch.isJoined) {
-                        joinStatus = 'alreadyjoined';
-                    } else {
-                        joinStatus = 'idle';
-                    }
+                    if (currentMatch.isJoined) joinStatus = 'alreadyjoined';
+                    else joinStatus = 'idle';
 
                     joinedCount = currentMatch.joinedCount || 0;
                     
@@ -725,33 +828,35 @@
                             renderJoinButton();
                         }
                     }
-
-                    skeleton.style.display = 'none';
-                    mainContent.style.display = 'block';
                 } catch (err) {
                     console.error(err);
-                    showModal('error', 'Error', 'Could not load match details. Please refresh.', [{
-                        text: 'REFRESH', action: 'redirect', url: window.location.href
-                    }]);
+                    showModal('error', 'Error', 'Could not load match details.', [{ text:'REFRESH', action:'redirect', url:window.location.href }]);
                 }
             }
 
-            // ---------- HANDLE JOIN (API CALL) ----------
+            // IGN validation
+            function validateIgn() {
+                const val = ignInput.value;
+                const pattern = /^[A-Za-z0-9 ]+$/;
+                if (val.length < 1 || val.length > 15 || !pattern.test(val)) {
+                    ignValidation.classList.remove('hidden');
+                    return false;
+                } else {
+                    ignValidation.classList.add('hidden');
+                    return true;
+                }
+            }
+
+            ignInput.addEventListener('input', validateIgn);
+
+            // Join handler (unchanged logic)
             async function handleJoinClick() {
+                if (!validateIgn()) {
+                    showModal('warning', 'Invalid IGN', 'Only letters, numbers and spaces (1-15 chars).', [{ text:'OK', action:'close' }]);
+                    return;
+                }
                 const ign = ignInput.value.trim();
-                if (!ign) {
-                    showModal('warning', 'IGN required', 'Please enter your in-game name.', [{
-                        text: 'OK', action: 'close'
-                    }]);
-                    ignInput.focus();
-                    return;
-                }
-                if (!currentUser) {
-                    showModal('error', 'Auth error', 'Please refresh and try again.', [{
-                        text: 'OK', action: 'close'
-                    }]);
-                    return;
-                }
+                if (!ign) return;
 
                 joinBtn.disabled = true;
                 joinBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> PROCESSING...';
@@ -759,100 +864,51 @@
                 try {
                     const token = await currentUser.getIdToken();
                     const response = await fetch(JOIN_ENDPOINT, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${token}`
-                        },
-                        body: JSON.stringify({
-                            matchId: matchId,
-                            ign: ign
-                        })
+                        method:'POST',
+                        headers:{ 'Content-Type':'application/json', 'Authorization':`Bearer ${token}` },
+                        body: JSON.stringify({ matchId, ign })
                     });
-
                     const data = await response.json();
 
                     if (response.ok && data.status === 'SUCCESS') {
                         joinStatus = 'joined';
-                        currentMatch.isJoined = true;   // update locally
+                        currentMatch.isJoined = true;
                         renderJoinButton();
-                        
                         localStorage.setItem('last_ign', ign);
+                        showModal('success','Success!','Match joined successfully.', [{ text:'OK', action:'redirect', url:redirectUrl }]);
 
-                        // Full screen success modal with OK -> redirect back
-                        showModal('success', 'Success!', 'Match joined successfully.', [{
-                            text: 'OK', action: 'redirect', url: redirectUrl
-                        }]);
-
-                        // if room details returned
                         if (data.roomDetails) {
                             currentMatch.roomId = data.roomDetails.roomId;
                             currentMatch.roomPass = data.roomDetails.roomPass;
                             updateUI();
                         } else {
-                            // refresh player count maybe
-                            joinedCount += 1;
-                            currentMatch.joinedCount = joinedCount;
+                            currentMatch.joinedCount = (currentMatch.joinedCount || 0) + 1;
                             updateUI();
                         }
                     } else {
                         const errorCode = data.error || '';
-                        let title = 'Join failed';
-                        let msg = data.message || 'Could not join match.';
-                        let modalType = 'error';
-                        let buttons = [{ text: 'BACK', action: 'redirect', url: redirectUrl }];
+                        let title='Join failed', msg=data.message||'Could not join.', modalType='error', buttons=[{ text:'BACK', action:'redirect', url:redirectUrl }];
 
                         if (errorCode === 'ALREADY_JOINED') {
-                            joinStatus = 'alreadyjoined';
-                            currentMatch.isJoined = true;
-                            modalType = 'warning';
-                            title = 'Already joined';
-                            msg = 'You have already joined this match.';
-                            buttons = [{ text: 'OK', action: 'redirect', url: redirectUrl }];
-                        } else if (errorCode === 'MATCH_FULL') {
-                            joinStatus = 'full';
-                            modalType = 'error';
-                            title = 'Match full';
-                            msg = 'This match is full.';
-                            buttons = [{ text: 'BACK', action: 'redirect', url: redirectUrl }];
-                        } else if (errorCode === 'INSUFFICIENT_BALANCE') {
-                            joinStatus = 'insufficient';
-                            modalType = 'warning';
-                            title = 'Insufficient balance';
-                            msg = 'Insufficient balance to join this match.';
-                            buttons = [
-                                { text: 'ADD MONEY', className: 'modal-button', action: 'redirect', url: 'wallet.html' },
-                                { text: 'BACK', className: 'modal-button secondary', action: 'redirect', url: redirectUrl }
-                            ];
-                        } else if (errorCode === 'MATCH_NOT_FOUND') {
-                            title = 'Not found';
-                            msg = 'Match does not exist.';
-                            buttons = [{ text: 'BACK', action: 'redirect', url: 'tournaments.html' }];
-                        } else if (errorCode === 'MATCH_STARTED') {
-                            joinStatus = 'error';
-                            title = 'Match started';
-                            msg = 'Cannot join a match that has already started.';
-                        } else {
-                            joinStatus = 'error';
-                        }
-
+                            joinStatus='alreadyjoined'; currentMatch.isJoined=true; modalType='warning'; title='Already joined'; msg='You have already joined.'; buttons=[{ text:'OK', action:'redirect', url:redirectUrl }];
+                        } else if (errorCode === 'MATCH_FULL') { joinStatus='full'; modalType='error'; title='Match full'; msg='This match is full.'; }
+                        else if (errorCode === 'INSUFFICIENT_BALANCE') { joinStatus='insufficient'; modalType='warning'; title='Insufficient balance'; msg='Insufficient balance.'; buttons=[{ text:'ADD MONEY', className:'modal-button', action:'redirect', url:'wallet.html' },{ text:'BACK', className:'modal-button secondary', action:'redirect', url:redirectUrl }];
+                        } else if (errorCode === 'MATCH_NOT_FOUND') { title='Not found'; msg='Match does not exist.'; buttons=[{ text:'BACK', action:'redirect', url:'tournaments.html' }];
+                        } else if (errorCode === 'MATCH_STARTED') { joinStatus='error'; title='Match started'; msg='Cannot join started match.'; } 
+                        else { joinStatus='error'; }
                         renderJoinButton();
                         showModal(modalType, title, msg, buttons);
                     }
                 } catch (error) {
-                    console.error('join error', error);
-                    joinStatus = 'error';
-                    renderJoinButton();
-                    showModal('error', 'Network error', 'Failed to connect to server. Please check connection.', [{ text: 'OK', action: 'close' }]);
+                    joinStatus='error'; renderJoinButton(); showModal('error','Network error','Failed to connect.', [{ text:'OK', action:'close' }]);
                 }
             }
 
-            // ---------- AUTH & INIT ----------
+            // Auth
             auth.onAuthStateChanged(async user => {
                 if (user) {
                     currentUser = user;
                     const token = await user.getIdToken();
-                    
                     const savedIgn = localStorage.getItem('last_ign');
                     if (savedIgn) ignInput.value = savedIgn;
 
@@ -860,16 +916,16 @@
                     await fetchMatchDetails(token);
                 } else {
                     auth.signInAnonymously().catch(e => {
-                        console.error('anon signin failed', e);
-                        showModal('error', 'Auth failed', 'Cannot connect. Refresh.', [{
-                            text: 'REFRESH', action: 'redirect', url: window.location.href
-                        }]);
+                        showModal('error','Auth failed','Cannot connect. Refresh.',[{ text:'REFRESH', action:'redirect', url:window.location.href }]);
                     });
                 }
             });
 
             backBtn.addEventListener('click', () => history.back());
 
+            // initial skeleton: everything is already shown via spans with skeleton-shimmer.
+            // banner skeleton: bannerWrapper background is dark, img hidden until load.
+            matchBanner.style.display = 'none';
         })();
     </script>
 </body>
