@@ -793,12 +793,9 @@ document.getElementById("payNowBtn").onclick = async () => {
     
     // Determine mode based on backend response or default to sandbox
     // If backend returns environment field, use it; otherwise default to sandbox for testing
-    let mode = "sandbox"; // default to sandbox for testing
-    if (data.environment === "production") {
-      mode = "production";
-    } else if (data.mode === "production") {
-      mode = "production";
-    }
+    const cashfree = Cashfree({
+  mode: "production"
+});
     
     // Initialize Cashfree with mode only - no merchantId, no custom constructor
     // Correct SDK initialization: Cashfree({ mode: "sandbox" }) or Cashfree({ mode: "production" })
