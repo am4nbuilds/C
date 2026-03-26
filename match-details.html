@@ -252,7 +252,7 @@
             font-size: 13px;
         }
 
-        /* Enhanced prize & rules list */
+        /* Prize & rules list */
         .prize-list-enhanced, .rules-list-enhanced, .details-list-enhanced {
             display: flex;
             flex-direction: column;
@@ -283,7 +283,7 @@
             font-weight: 500;
         }
 
-        /* Room credentials card */
+        /* Room credentials card - enhanced styles */
         .credential-container {
             display: flex;
             flex-direction: column;
@@ -349,35 +349,6 @@
             background: #10b981;
         }
 
-        .get-room-btn {
-            background: linear-gradient(135deg, #10b981, #059669);
-            border: none;
-            padding: 12px 20px;
-            border-radius: 12px;
-            color: white;
-            font-weight: 700;
-            font-size: 14px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            width: 100%;
-            transition: all 0.2s;
-            margin-top: 8px;
-        }
-
-        .get-room-btn:hover {
-            transform: translateY(-2px);
-            background: linear-gradient(135deg, #059669, #047857);
-        }
-
-        .get-room-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-
         .live-badge {
             background: linear-gradient(135deg, #ef4444, #dc2626);
             padding: 4px 12px;
@@ -392,6 +363,75 @@
             0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.5); }
             70% { box-shadow: 0 0 0 6px rgba(239,68,68,0); }
             100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
+        }
+
+        /* Skeleton loading animation */
+        .skeleton {
+            background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 12px;
+        }
+        
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        
+        .skeleton-item {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 14px 16px;
+            margin-bottom: 12px;
+        }
+        
+        .skeleton-line {
+            height: 16px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .skeleton-line.short {
+            width: 60%;
+        }
+        
+        .skeleton-line.long {
+            width: 100%;
+        }
+        
+        .skeleton-value {
+            height: 42px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 10px;
+            width: 180px;
+            margin-top: 6px;
+        }
+        
+        .room-message {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 14px;
+            padding: 18px 16px;
+            border-left: 3px solid;
+        }
+        
+        .room-message.info {
+            border-left-color: #3b82f6;
+        }
+        
+        .room-message.warning {
+            border-left-color: #f59e0b;
+        }
+        
+        .room-message.error {
+            border-left-color: #ef4444;
+        }
+        
+        .room-message i {
+            font-size: 22px;
         }
 
         /* Participants table */
@@ -420,7 +460,7 @@
             font-weight: 600;
         }
 
-        /* loading spinner */
+        /* loading spinner for main */
         .spinner-center {
             display: flex;
             justify-content: center;
@@ -452,31 +492,6 @@
             background: rgba(239,68,68,0.1);
             border-radius: 12px;
             margin-top: 12px;
-        }
-
-        /* Loading spinner for button */
-        .btn-loading {
-            position: relative;
-            pointer-events: none;
-        }
-
-        .btn-loading::after {
-            content: '';
-            position: absolute;
-            width: 16px;
-            height: 16px;
-            top: 50%;
-            left: 50%;
-            margin-left: -8px;
-            margin-top: -8px;
-            border: 2px solid rgba(255,255,255,0.3);
-            border-top-color: white;
-            border-radius: 50%;
-            animation: spin 0.6s linear infinite;
-        }
-
-        .btn-loading span {
-            visibility: hidden;
         }
     </style>
 </head>
@@ -529,14 +544,15 @@
                     </div>
                 </div>
 
-                <!-- ROOM CREDENTIALS (requires button click) -->
+                <!-- ROOM CREDENTIALS (auto-fetch, no button) -->
                 <div class="card" id="roomCredentialsCard">
-                    <div class="card-header"><i class="fa-solid fa-key text-green-400"></i> Room Credentials <span id="roomStatusBadge" class="live-badge" style="display: none;">LIVE</span></div>
+                    <div class="card-header">
+                        <i class="fa-solid fa-key text-green-400"></i> 
+                        Room Credentials 
+                        <span id="roomStatusBadge" class="live-badge" style="display: none;">LIVE</span>
+                    </div>
                     <div id="roomCredentialsContent">
-                        <button class="get-room-btn" id="getRoomDetailsBtn">
-                            <i class="fa-solid fa-door-open"></i>
-                            <span>Get Room Details</span>
-                        </button>
+                        <!-- Skeleton will be injected here initially -->
                     </div>
                 </div>
 
@@ -599,84 +615,10 @@
     let currentMatchData = null;
     let currentMatchId = null;
     let currentStatus = null;
-    let currentUserToken = null;     // Store token after auth to avoid race conditions
-    let isLoadingRoom = false;
+    let currentUserToken = null;
+    let roomFetchExecuted = false;     // ensure room fetch runs only once
     
-    // Helper: render bullet list for match settings
-    function renderBulletList(containerId, lines, icon = "fa-circle", iconColor = "#3f3ef2") {
-        const container = document.getElementById(containerId);
-        if (!container) return;
-        if (!lines || lines.trim() === "") {
-            container.innerHTML = '<div class="empty-message" style="padding:20px;">No details provided.</div>';
-            return;
-        }
-        const items = lines.split("\n").filter(l => l.trim().length > 0);
-        if (items.length === 0) {
-            container.innerHTML = '<div class="empty-message">Not available.</div>';
-            return;
-        }
-        let html = '<div class="details-list-enhanced">';
-        items.forEach(line => {
-            html += `
-                <div class="details-item-enhanced">
-                    <div class="details-icon" style="color:${iconColor};"><i class="fas ${icon}"></i></div>
-                    <div class="details-text">${escapeHtml(line.trim())}</div>
-                </div>
-            `;
-        });
-        html += '</div>';
-        container.innerHTML = html;
-    }
-    
-    function renderPrizeDistribution(containerId, text) {
-        const container = document.getElementById(containerId);
-        if (!container) return;
-        if (!text || text.trim() === "") {
-            container.innerHTML = '<div class="empty-message">Prize distribution not specified.</div>';
-            return;
-        }
-        const lines = text.split("\n").filter(l => l.trim().length > 0);
-        let html = '<div class="prize-list-enhanced">';
-        lines.forEach((line, idx) => {
-            let icon = "fa-trophy";
-            let color = "#f59e0b";
-            if (idx === 0) { icon = "fa-crown"; color = "#fbbf24"; }
-            else if (idx === 1) { icon = "fa-medal"; color = "#cbd5e1"; }
-            else if (idx === 2) { icon = "fa-award"; color = "#d97706"; }
-            html += `
-                <div class="prize-item-enhanced">
-                    <div class="prize-icon" style="color:${color};"><i class="fas ${icon}"></i></div>
-                    <div class="prize-text">${escapeHtml(line.trim())}</div>
-                </div>
-            `;
-        });
-        html += '</div>';
-        container.innerHTML = html;
-    }
-    
-    function renderRulesWithIcons(containerId, rulesText) {
-        const container = document.getElementById(containerId);
-        if (!container) return;
-        if (!rulesText || rulesText.trim() === "") {
-            container.innerHTML = '<div class="empty-message">No official rules added.</div>';
-            return;
-        }
-        const lines = rulesText.split("\n").filter(l => l.trim().length > 0);
-        const icons = ['fa-ban','fa-user-slash','fa-shield-halved','fa-clock','fa-network-wired','fa-triangle-exclamation','fa-people-arrows','fa-mobile-screen','fa-wifi','fa-flag'];
-        let html = '<div class="rules-list-enhanced">';
-        lines.forEach((line, i) => {
-            const iconClass = icons[i % icons.length];
-            html += `
-                <div class="rules-item-enhanced">
-                    <div class="rules-icon" style="color:#a5b4fc;"><i class="fas ${iconClass}"></i></div>
-                    <div class="rules-text">${escapeHtml(line.trim())}</div>
-                </div>
-            `;
-        });
-        html += '</div>';
-        container.innerHTML = html;
-    }
-    
+    // Helper functions for rendering
     function escapeHtml(str) { 
         if (!str) return '';
         return str.replace(/[&<>]/g, function(m){ 
@@ -715,31 +657,132 @@
         } else { alert("Copy manually: " + text); }
     }
     
-    // Fetch room credentials using stored token (ensures no race)
-    async function fetchRoomCredentials() {
-        if (!currentUserToken) {
-            const credContent = document.getElementById('roomCredentialsContent');
-            if (credContent) credContent.innerHTML = `<div class="error-message"><i class="fa-solid fa-lock"></i> Authentication not ready. Please try again.</div>`;
+    // Show skeleton loader in room credentials section
+    function showRoomSkeleton() {
+        const container = document.getElementById('roomCredentialsContent');
+        if (!container) return;
+        container.innerHTML = `
+            <div class="skeleton-item">
+                <div class="skeleton-line short" style="width: 70px; margin-bottom: 12px;"></div>
+                <div class="skeleton-value"></div>
+            </div>
+            <div class="skeleton-item">
+                <div class="skeleton-line short" style="width: 70px; margin-bottom: 12px;"></div>
+                <div class="skeleton-value"></div>
+            </div>
+        `;
+    }
+    
+    // Show static message when match is not ongoing
+    function showNotLiveMessage() {
+        const container = document.getElementById('roomCredentialsContent');
+        if (!container) return;
+        container.innerHTML = `
+            <div class="room-message info">
+                <i class="fa-solid fa-clock text-blue-400"></i>
+                <div>
+                    <strong style="color: #a5b4fc;">Room details will be available when the match goes live.</strong>
+                    <p style="font-size: 13px; color: #9aa3b2; margin-top: 4px;">Stay tuned for the match start time.</p>
+                </div>
+            </div>
+        `;
+    }
+    
+    // Show 403 / not joined message
+    function showNotJoinedMessage() {
+        const container = document.getElementById('roomCredentialsContent');
+        if (!container) return;
+        container.innerHTML = `
+            <div class="room-message warning">
+                <i class="fa-solid fa-door-closed text-orange-400"></i>
+                <div>
+                    <strong style="color: #fbbf24;">Join this match to access room details</strong>
+                    <p style="font-size: 13px; color: #9aa3b2; margin-top: 4px;">Room credentials are only available to participants who have joined the match.</p>
+                </div>
+            </div>
+        `;
+    }
+    
+    // Show generic error
+    function showRoomError(message) {
+        const container = document.getElementById('roomCredentialsContent');
+        if (!container) return;
+        container.innerHTML = `
+            <div class="room-message error">
+                <i class="fa-solid fa-exclamation-triangle text-red-400"></i>
+                <div>
+                    <strong style="color: #f87171;">Unable to load room details</strong>
+                    <p style="font-size: 13px; color: #9aa3b2; margin-top: 4px;">${escapeHtml(message)}</p>
+                </div>
+            </div>
+        `;
+    }
+    
+    // Display room credentials with copy buttons
+    function displayRoomCredentials(roomId, password, isOngoing) {
+        const container = document.getElementById('roomCredentialsContent');
+        if (!container) return;
+        
+        // Show LIVE badge if ongoing
+        const badge = document.getElementById('roomStatusBadge');
+        if (badge && isOngoing) {
+            badge.style.display = 'inline-block';
+        } else if (badge) {
+            badge.style.display = 'none';
+        }
+        
+        container.innerHTML = `
+            <div class="credential-container">
+                <div class="credential-item">
+                    <div class="credential-info">
+                        <div class="credential-label">Room ID</div>
+                        <div class="credential-value" id="roomIdValue">${escapeHtml(roomId)}</div>
+                    </div>
+                    <button class="copy-btn" id="copyRoomIdBtn"><i class="fa-regular fa-copy"></i> Copy</button>
+                </div>
+                <div class="credential-item">
+                    <div class="credential-info">
+                        <div class="credential-label">Password</div>
+                        <div class="credential-value" id="roomPassValue">${escapeHtml(password)}</div>
+                    </div>
+                    <button class="copy-btn" id="copyRoomPassBtn"><i class="fa-regular fa-copy"></i> Copy</button>
+                </div>
+            </div>
+        `;
+        
+        const copyIdBtn = document.getElementById('copyRoomIdBtn');
+        const copyPassBtn = document.getElementById('copyRoomPassBtn');
+        if (copyIdBtn) copyIdBtn.onclick = () => copyToClipboard(roomId, copyIdBtn);
+        if (copyPassBtn) copyPassBtn.onclick = () => copyToClipboard(password, copyPassBtn);
+    }
+    
+    // Fetch room credentials automatically after match load (only if ongoing)
+    async function fetchRoomCredentialsAuto(token, matchId, status) {
+        if (roomFetchExecuted) return;
+        roomFetchExecuted = true;
+        
+        // If status is not ongoing, show static message and skip API call
+        if (status !== 'ongoing') {
+            showNotLiveMessage();
             return;
         }
         
-        const button = document.getElementById('getRoomDetailsBtn');
-        const credentialsContent = document.getElementById('roomCredentialsContent');
-        if (!button) return;
-        if (isLoadingRoom) return;
-        isLoadingRoom = true;
-        
-        // Disable button and show loading
-        button.disabled = true;
-        button.classList.add('btn-loading');
+        // Show skeleton loader
+        showRoomSkeleton();
         
         try {
-            const response = await fetch(`${BACKEND_URL}/room-credentials?matchId=${encodeURIComponent(currentMatchId)}&status=${encodeURIComponent(currentStatus)}`, {
-                headers: { 'Authorization': `Bearer ${currentUserToken}` }
+            const response = await fetch(`${BACKEND_URL}/room-credentials?matchId=${encodeURIComponent(matchId)}&status=${encodeURIComponent(status)}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
             });
             
             if (response.status === 401) { 
                 window.location.href = 'login.html'; 
+                return;
+            }
+            
+            if (response.status === 403) {
+                // User not joined or not authorized
+                showNotJoinedMessage();
                 return;
             }
             
@@ -750,82 +793,30 @@
             
             const data = await response.json();
             
-            // Success - display room credentials
             if (data.roomId && data.password) {
-                credentialsContent.innerHTML = `
-                    <div class="credential-container">
-                        <div class="credential-item">
-                            <div class="credential-info">
-                                <div class="credential-label">Room ID</div>
-                                <div class="credential-value" id="roomIdValue">${escapeHtml(data.roomId)}</div>
-                            </div>
-                            <button class="copy-btn" id="copyRoomIdBtn"><i class="fa-regular fa-copy"></i> Copy</button>
-                        </div>
-                        <div class="credential-item">
-                            <div class="credential-info">
-                                <div class="credential-label">Password</div>
-                                <div class="credential-value" id="roomPassValue">${escapeHtml(data.password)}</div>
-                            </div>
-                            <button class="copy-btn" id="copyRoomPassBtn"><i class="fa-regular fa-copy"></i> Copy</button>
-                        </div>
-                    </div>
-                `;
-                
-                // Show live badge
-                const badge = document.getElementById('roomStatusBadge');
-                if (badge) badge.style.display = 'inline-block';
-                
-                // Attach copy handlers
-                const copyIdBtn = document.getElementById('copyRoomIdBtn');
-                const copyPassBtn = document.getElementById('copyRoomPassBtn');
-                if (copyIdBtn) copyIdBtn.onclick = () => copyToClipboard(data.roomId, copyIdBtn);
-                if (copyPassBtn) copyPassBtn.onclick = () => copyToClipboard(data.password, copyPassBtn);
+                displayRoomCredentials(data.roomId, data.password, status === 'ongoing');
             } else {
                 throw new Error("Invalid room credentials data");
             }
             
         } catch (err) {
-            console.error('Error fetching room credentials:', err);
-            credentialsContent.innerHTML = `
-                <div class="error-message">
-                    <i class="fa-solid fa-exclamation-triangle"></i> 
-                    ${escapeHtml(err.message)}
-                </div>
-                <button class="get-room-btn" id="getRoomDetailsBtn" style="margin-top: 12px;">
-                    <i class="fa-solid fa-rotate-right"></i>
-                    <span>Try Again</span>
-                </button>
-            `;
-            // Re-attach event listener
-            const newButton = document.getElementById('getRoomDetailsBtn');
-            if (newButton) {
-                newButton.addEventListener('click', fetchRoomCredentials);
-            }
-        } finally {
-            isLoadingRoom = false;
-            const btn = document.getElementById('getRoomDetailsBtn');
-            if (btn && btn !== button) {
-                btn.disabled = false;
-                btn.classList.remove('btn-loading');
-            } else if (button) {
-                button.disabled = false;
-                button.classList.remove('btn-loading');
-            }
+            console.error('Room credentials error:', err);
+            showRoomError(err.message || "Please try again later.");
         }
     }
     
-    function renderMatchUI(data) {
+    // Render match UI (same as before but without button)
+    function renderMatchUI(data, token, status, matchId) {
         const template = document.getElementById('mainTemplate');
         const clone = template.content.cloneNode(true);
         const mainDiv = document.getElementById('mainContainer');
         mainDiv.innerHTML = '';
         mainDiv.appendChild(clone);
         
-        // All match fields are inside matchDetails object
         const matchDetails = data.matchDetails || {};
         
         // Header
-        const matchIdDisplay = matchDetails.matchId || data.id || currentMatchId || 'N/A';
+        const matchIdDisplay = matchDetails.matchId || data.id || matchId || 'N/A';
         document.getElementById('matchIdDisplay').innerText = `ID: ${matchIdDisplay}`;
         document.title = `${matchIdDisplay} - Match Details`;
         
@@ -834,7 +825,7 @@
         bannerImg.src = matchDetails.banner || 'https://via.placeholder.com/600x338?text=Match+Banner';
         bannerImg.onerror = () => { bannerImg.src = 'https://via.placeholder.com/600x338?text=Match+Banner'; };
         
-        // Stats from matchDetails
+        // Stats
         document.getElementById('prizePoolVal').innerHTML = `₹${(matchDetails.prizePool || 0).toLocaleString()}`;
         document.getElementById('perKillVal').innerHTML = `₹${(matchDetails.perKill || 0)}`;
         document.getElementById('entryFeeVal').innerHTML = `₹${(matchDetails.entryFee || 0)}`;
@@ -849,24 +840,12 @@
         document.getElementById('platformVal').innerText = matchDetails.platform || 'Phone';
         document.getElementById('mapVal').innerText = matchDetails.map || 'N/A';
         
-        // Prize distribution from matchDetails
+        // Prize distribution
         renderPrizeDistribution('prizeDistributionContainer', matchDetails.prizeDistribution || '');
         renderBulletList('matchSettingsContainer', matchDetails.matchSettings || '', 'fa-cog', '#f97316');
         renderRulesWithIcons('rulesContainer', matchDetails.rules || '');
         
-        // Show live badge if match is ongoing
-        if (currentStatus === 'ongoing') {
-            const badge = document.getElementById('roomStatusBadge');
-            if (badge) badge.style.display = 'inline-block';
-        }
-        
-        // Attach Get Room Details button event
-        const getRoomBtn = document.getElementById('getRoomDetailsBtn');
-        if (getRoomBtn) {
-            getRoomBtn.addEventListener('click', fetchRoomCredentials);
-        }
-        
-        // Participants rendering
+        // Participants
         const tbody = document.getElementById('participantsTableBody');
         const participantCountSpan = document.getElementById('participantCount');
         const participants = data.participants || [];
@@ -888,17 +867,91 @@
         }
         
         currentMatchData = data;
+        
+        // Auto-fetch room credentials after UI is rendered
+        fetchRoomCredentialsAuto(token, matchId, status);
     }
     
-    async function loadMatchDetails(token) {
-        if (!token) return;
-        if (!currentMatchId || !currentStatus) {
-            document.getElementById('mainContainer').innerHTML = '<div class="empty-message">❌ Missing matchId or status in URL.</div>';
+    // Helper rendering functions
+    function renderPrizeDistribution(containerId, text) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        if (!text || text.trim() === "") {
+            container.innerHTML = '<div class="empty-message">Prize distribution not specified.</div>';
             return;
         }
+        const lines = text.split("\n").filter(l => l.trim().length > 0);
+        let html = '<div class="prize-list-enhanced">';
+        lines.forEach((line, idx) => {
+            let icon = "fa-trophy";
+            let color = "#f59e0b";
+            if (idx === 0) { icon = "fa-crown"; color = "#fbbf24"; }
+            else if (idx === 1) { icon = "fa-medal"; color = "#cbd5e1"; }
+            else if (idx === 2) { icon = "fa-award"; color = "#d97706"; }
+            html += `
+                <div class="prize-item-enhanced">
+                    <div class="prize-icon" style="color:${color};"><i class="fas ${icon}"></i></div>
+                    <div class="prize-text">${escapeHtml(line.trim())}</div>
+                </div>
+            `;
+        });
+        html += '</div>';
+        container.innerHTML = html;
+    }
+    
+    function renderBulletList(containerId, lines, icon = "fa-circle", iconColor = "#3f3ef2") {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        if (!lines || lines.trim() === "") {
+            container.innerHTML = '<div class="empty-message" style="padding:20px;">No details provided.</div>';
+            return;
+        }
+        const items = lines.split("\n").filter(l => l.trim().length > 0);
+        if (items.length === 0) {
+            container.innerHTML = '<div class="empty-message">Not available.</div>';
+            return;
+        }
+        let html = '<div class="details-list-enhanced">';
+        items.forEach(line => {
+            html += `
+                <div class="details-item-enhanced">
+                    <div class="details-icon" style="color:${iconColor};"><i class="fas ${icon}"></i></div>
+                    <div class="details-text">${escapeHtml(line.trim())}</div>
+                </div>
+            `;
+        });
+        html += '</div>';
+        container.innerHTML = html;
+    }
+    
+    function renderRulesWithIcons(containerId, rulesText) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        if (!rulesText || rulesText.trim() === "") {
+            container.innerHTML = '<div class="empty-message">No official rules added.</div>';
+            return;
+        }
+        const lines = rulesText.split("\n").filter(l => l.trim().length > 0);
+        const icons = ['fa-ban','fa-user-slash','fa-shield-halved','fa-clock','fa-network-wired','fa-triangle-exclamation','fa-people-arrows','fa-mobile-screen','fa-wifi','fa-flag'];
+        let html = '<div class="rules-list-enhanced">';
+        lines.forEach((line, i) => {
+            const iconClass = icons[i % icons.length];
+            html += `
+                <div class="rules-item-enhanced">
+                    <div class="rules-icon" style="color:#a5b4fc;"><i class="fas ${iconClass}"></i></div>
+                    <div class="rules-text">${escapeHtml(line.trim())}</div>
+                </div>
+            `;
+        });
+        html += '</div>';
+        container.innerHTML = html;
+    }
+    
+    async function loadMatchDetails(token, matchId, status) {
+        if (!token || !matchId || !status) return;
         
         try {
-            const response = await fetch(`${BACKEND_URL}/match-details?matchId=${encodeURIComponent(currentMatchId)}&status=${encodeURIComponent(currentStatus)}`, {
+            const response = await fetch(`${BACKEND_URL}/match-details?matchId=${encodeURIComponent(matchId)}&status=${encodeURIComponent(status)}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             
@@ -912,7 +965,7 @@
                 throw new Error(`API error ${response.status}: ${errText}`);
             }
             const data = await response.json();
-            renderMatchUI(data);
+            renderMatchUI(data, token, status, matchId);
         } catch (err) {
             console.error(err);
             document.getElementById('mainContainer').innerHTML = `<div class="empty-message">⚠️ Failed to load match: ${escapeHtml(err.message)}</div>`;
@@ -942,7 +995,7 @@
         else if (tab === 'participants') { participantsDiv.style.display = 'block'; if(participantsBtn) participantsBtn.classList.add('active'); }
     }
     
-    // Event listeners (delegated to document)
+    // Event listeners
     document.addEventListener('click', (e) => {
         if (e.target.closest('#tabDetailsBtn')) switchTab('details');
         else if (e.target.closest('#tabRulesBtn')) switchTab('rules');
@@ -964,13 +1017,13 @@
         document.getElementById('mainContainer').innerHTML = '<div class="empty-message">❌ Invalid URL: matchId and status required.</div>';
     }
     
-    // Firebase auth: wait for user and get token, then load match details
+    // Firebase auth: wait for user, get token, then load match details and auto-fetch room
     auth.onAuthStateChanged(async (user) => {
         if (user) {
             try {
                 const token = await user.getIdToken();
                 currentUserToken = token;
-                await loadMatchDetails(token);
+                await loadMatchDetails(token, currentMatchId, currentStatus);
             } catch (err) {
                 console.error("Token error:", err);
                 document.getElementById('mainContainer').innerHTML = '<div class="empty-message">Authentication error. Please login again.</div>';
