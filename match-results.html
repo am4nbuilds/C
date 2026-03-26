@@ -390,37 +390,90 @@
     else window.location.href = 'tournaments.html';
   }
 
-  // Show matchId in header
+  // Show matchId in header with strict string safety
   if (matchId) {
     const matchIdSpan = document.getElementById('matchIdDisplay');
-    if (matchIdSpan) matchIdSpan.innerText = matchId.length > 12 ? matchId.slice(0,12)+'…' : matchId;
+    const safeMatchId = String(matchId || "");
+    if (matchIdSpan) matchIdSpan.innerText = safeMatchId.length > 12 ? safeMatchId.slice(0,12)+'…' : safeMatchId;
   }
 
-  // Render leaderboard from API data (exactly using players object, placements/kills/totalWinnings from results)
+  // ----- SAFE STRING UTILITIES (FULL COERCION) -----
+  function safeString(value, fallback = '') {
+    if (value === undefined || value === null) return fallback;
+    if (typeof value === 'string') return value;
+    if (typeof value === 'number' || typeof value === 'boolean') return String(value);
+    try {
+      return JSON.stringify(value);
+    } catch(e) {
+      return fallback;
+    }
+  }
+
+  function safeNumber(value, fallback = 0) {
+    if (value === undefined || value === null) return fallback;
+    const num = Number(value);
+    return isNaN(num) ? fallback : num;
+  }
+
+  // Enhanced escapeHtml with guaranteed string input
+  function escapeHtml(raw) {
+    let str = safeString(raw, '');
+    return str.replace(/[&<>]/g, function(m) {
+      if (m === '&') return '&amp;';
+      if (m === '<') return '&lt;';
+      if (m === '>') return '&gt;';
+      return m;
+    }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
+      return c;
+    });
+  }
+
+  // Safely get player IGN from players object (players[uid] might be object with .ign or direct string)
+  function getPlayerIgn(playersObj, uid, defaultName = 'Unknown Player') {
+    if (!playersObj || uid === undefined || uid === null) return defaultName;
+    const playerData = playersObj[uid];
+    if (playerData === undefined || playerData === null) return defaultName;
+    // if playerData is object and has ign property, use that, else if it's string use it, else convert
+    if (typeof playerData === 'object') {
+      const ignVal = playerData.ign !== undefined ? playerData.ign : playerData.displayName;
+      return safeString(ignVal, defaultName);
+    }
+    return safeString(playerData, defaultName);
+  }
+
+  // ---------------------- CORE LEADERBOARD BUILDER (NO STRING METHOD ON RAW VALUES) -----------------
   function buildLeaderboardFromApi(apiData) {
-    const { results, players } = apiData;
-    if (!results) return [];
+    // Guard: ensure apiData and results exist
+    if (!apiData || !apiData.results) return [];
+    const results = apiData.results;
+    const players = apiData.players || {};
+    
+    // Safely extract sub-objects
+    const placements = results.placements && typeof results.placements === 'object' ? results.placements : {};
+    const kills = results.kills && typeof results.kills === 'object' ? results.kills : {};
+    const rankPrizes = results.rankPrizes && typeof results.rankPrizes === 'object' ? results.rankPrizes : {};
+    const totalWinnings = results.totalWinnings && typeof results.totalWinnings === 'object' ? results.totalWinnings : {};
+    const perKill = safeNumber(apiData.matchDetails?.perKill, 0);
+    
+    const resultsMap = new Map(); // uid -> player entry
 
-    const placements = results.placements || {};
-    const kills = results.kills || {};
-    const rankPrizes = results.rankPrizes || {};
-    const totalWinnings = results.totalWinnings || {};
-    const perKill = apiData.matchDetails?.perKill || 0;
-
-    // Build map: uid -> aggregated entry
-    const resultsMap = new Map(); // uid -> { uid, position, rankWinnings, kills, killWinnings, totalWinnings, ign }
-
-    // 1. Process placements (ranks have explicit positions)
-    Object.entries(placements).forEach(([rankKey, uid]) => {
+    // 1. Process placements (ranks)
+    Object.entries(placements).forEach(([rankKey, uidRaw]) => {
+      if (uidRaw === undefined || uidRaw === null) return;
+      const uid = safeString(uidRaw, '');
       if (!uid) return;
+      // Extract rank number from rankKey (e.g., "rank_1") -> strictly using safeString + replace
+      const safeRankKey = safeString(rankKey, '');
+      const rankNumMatch = safeRankKey.replace(/[^\d]/g, '');
       let position = 999;
-      // rankKey format "rank_1", "rank_2", etc.
-      const rankNum = parseInt(rankKey.replace(/[^\d]/g, ''));
-      if (!isNaN(rankNum)) position = rankNum;
-      const rankPrizeVal = parseFloat(rankPrizes[uid] || 0);
-      const killCount = kills[uid] || 0;
-      const killWinnings = killCount * parseFloat(perKill);
-      const totalWinVal = parseFloat(totalWinnings[uid] || (rankPrizeVal + killWinnings));
+      const parsedRank = parseInt(rankNumMatch, 10);
+      if (!isNaN(parsedRank)) position = parsedRank;
+      
+      const rankPrizeVal = safeNumber(rankPrizes[uid], 0);
+      const killCount = safeNumber(kills[uid], 0);
+      const killWinnings = killCount * perKill;
+      const totalWinVal = safeNumber(totalWinnings[uid], rankPrizeVal + killWinnings);
+      
       resultsMap.set(uid, {
         uid: uid,
         position: position,
@@ -428,16 +481,19 @@
         kills: killCount,
         killWinnings: killWinnings,
         totalWinnings: totalWinVal,
-        ign: players?.[uid] || 'Unknown Player'
+        ign: getPlayerIgn(players, uid, 'Unknown Player')
       });
     });
 
-    // 2. Process players who have kills but no placement (ex: non-ranked kills)
-    Object.entries(kills).forEach(([uid, killCount]) => {
+    // 2. Process kills for players not in placements
+    Object.entries(kills).forEach(([uidRaw, killCountRaw]) => {
+      const uid = safeString(uidRaw, '');
+      if (!uid) return;
+      const killCount = safeNumber(killCountRaw, 0);
       if (!resultsMap.has(uid)) {
-        const killWinnings = killCount * parseFloat(perKill);
-        const rankPrizeVal = parseFloat(rankPrizes[uid] || 0);
-        const totalWinVal = parseFloat(totalWinnings[uid] || (rankPrizeVal + killWinnings));
+        const rankPrizeVal = safeNumber(rankPrizes[uid], 0);
+        const killWinnings = killCount * perKill;
+        const totalWinVal = safeNumber(totalWinnings[uid], rankPrizeVal + killWinnings);
         resultsMap.set(uid, {
           uid: uid,
           position: 999,
@@ -445,27 +501,28 @@
           kills: killCount,
           killWinnings: killWinnings,
           totalWinnings: totalWinVal,
-          ign: players?.[uid] || 'Unknown Player'
+          ign: getPlayerIgn(players, uid, 'Unknown Player')
         });
       } else {
-        // update kills if missing
         const existing = resultsMap.get(uid);
         if (existing.kills === 0 && killCount > 0) {
           existing.kills = killCount;
-          existing.killWinnings = killCount * parseFloat(perKill);
+          existing.killWinnings = killCount * perKill;
           existing.totalWinnings = existing.rankWinnings + existing.killWinnings;
           resultsMap.set(uid, existing);
         }
       }
     });
 
-    // 3. Process rankPrizes only if player not yet in map (some may have prize but 0 kills)
-    Object.entries(rankPrizes).forEach(([uid, prize]) => {
+    // 3. Process rankPrizes only for missing players
+    Object.entries(rankPrizes).forEach(([uidRaw, prizeRaw]) => {
+      const uid = safeString(uidRaw, '');
+      if (!uid) return;
       if (!resultsMap.has(uid)) {
-        const killCount = kills[uid] || 0;
-        const killWinnings = killCount * parseFloat(perKill);
-        const rankPrizeVal = parseFloat(prize);
-        const totalWinVal = parseFloat(totalWinnings[uid] || (rankPrizeVal + killWinnings));
+        const killCount = safeNumber(kills[uid], 0);
+        const killWinnings = killCount * perKill;
+        const rankPrizeVal = safeNumber(prizeRaw, 0);
+        const totalWinVal = safeNumber(totalWinnings[uid], rankPrizeVal + killWinnings);
         resultsMap.set(uid, {
           uid: uid,
           position: 999,
@@ -473,30 +530,32 @@
           kills: killCount,
           killWinnings: killWinnings,
           totalWinnings: totalWinVal,
-          ign: players?.[uid] || 'Unknown Player'
+          ign: getPlayerIgn(players, uid, 'Unknown Player')
         });
       }
     });
 
-    // 4. Edge case: totalWinnings entries with missing placement/kills but just in case
-    Object.entries(totalWinnings).forEach(([uid, win]) => {
+    // 4. Process totalWinnings for any stragglers
+    Object.entries(totalWinnings).forEach(([uidRaw, winRaw]) => {
+      const uid = safeString(uidRaw, '');
+      if (!uid) return;
       if (!resultsMap.has(uid)) {
-        const killCount = kills[uid] || 0;
-        const killWinnings = killCount * parseFloat(perKill);
-        const rankPrizeVal = parseFloat(rankPrizes[uid] || 0);
+        const killCount = safeNumber(kills[uid], 0);
+        const killWinnings = killCount * perKill;
+        const rankPrizeVal = safeNumber(rankPrizes[uid], 0);
         resultsMap.set(uid, {
           uid: uid,
           position: 999,
           rankWinnings: rankPrizeVal,
           kills: killCount,
           killWinnings: killWinnings,
-          totalWinnings: parseFloat(win),
-          ign: players?.[uid] || 'Unknown Player'
+          totalWinnings: safeNumber(winRaw, rankPrizeVal + killWinnings),
+          ign: getPlayerIgn(players, uid, 'Unknown Player')
         });
       }
     });
 
-    // Convert to array and sort: by position ASC, then totalWinnings DESC
+    // Convert to array and sort
     let leaderboard = Array.from(resultsMap.values());
     leaderboard.sort((a, b) => {
       if (a.position !== b.position) return a.position - b.position;
@@ -505,7 +564,7 @@
     return leaderboard;
   }
 
-  // Render leaderboard rows + handle empty/errors
+  // Render leaderboard rows with full safe string/ number handling
   function renderLeaderboard(leaderboardData, container) {
     if (!leaderboardData || leaderboardData.length === 0) {
       container.innerHTML = `
@@ -519,13 +578,15 @@
 
     container.innerHTML = '';
     leaderboardData.forEach((player, idx) => {
-      // Display position: if position is 999 (unranked) then use index+1 as fallback
-      let displayPos = player.position;
+      let displayPos = safeNumber(player.position, 999);
       if (displayPos === 999) displayPos = idx + 1;
       const posClass = displayPos === 1 ? 'pos-1' : displayPos === 2 ? 'pos-2' : displayPos === 3 ? 'pos-3' : 'pos-other';
-      const winningsFormatted = player.totalWinnings > 0 ? `₹${Math.round(player.totalWinnings).toLocaleString()}` : '₹0';
-      const killsCount = player.kills ?? 0;
-      const ignSanitized = escapeHtml(player.ign || 'Anonymous');
+      const winningsNum = safeNumber(player.totalWinnings, 0);
+      const winningsFormatted = winningsNum > 0 ? `₹${Math.round(winningsNum).toLocaleString()}` : '₹0';
+      const killsCount = safeNumber(player.kills, 0);
+      const ignRaw = safeString(player.ign, 'Anonymous');
+      const ignSanitized = escapeHtml(ignRaw);
+      const uidSafe = encodeURIComponent(safeString(player.uid, ''));
       
       const row = document.createElement('div');
       row.className = 'leaderboard-row';
@@ -534,31 +595,20 @@
         <div class="col-name">${ignSanitized}</div>
         <div class="col-winnings">${winningsFormatted}</div>
         <div class="col-kills">${killsCount}</div>
-        <div class="col-view view-profile"><a href="view-profile.html?uid=${encodeURIComponent(player.uid)}"><i class="fa-solid fa-eye"></i></a></div>
+        <div class="col-view view-profile"><a href="view-profile.html?uid=${uidSafe}"><i class="fa-solid fa-eye"></i></a></div>
       `;
       container.appendChild(row);
     });
   }
 
-  // simple escape to avoid XSS
-  function escapeHtml(str) {
-    if (!str) return '';
-    return str.replace(/[&<>]/g, function(m) {
-      if (m === '&') return '&amp;';
-      if (m === '<') return '&lt;';
-      if (m === '>') return '&gt;';
-      return m;
-    }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
-      return c;
-    });
-  }
-
-  // Main fetch logic: only call backend if status === 'completed'
-  async function fetchMatchResults(token, matchId, status) {
-    if (status !== 'completed') {
+  // Fetch match results with token
+  async function fetchMatchResults(token, matchIdParam, status) {
+    const safeStatus = safeString(status, '');
+    if (safeStatus !== 'completed') {
       throw new Error('STATUS_NOT_COMPLETED');
     }
-    const url = `${BACKEND_URL}/match-results?matchId=${encodeURIComponent(matchId)}&status=completed`;
+    const safeMatchId = encodeURIComponent(safeString(matchIdParam, ''));
+    const url = `${BACKEND_URL}/match-results?matchId=${safeMatchId}&status=completed`;
     const response = await fetch(url, {
       method: 'GET',
       headers: {
@@ -575,66 +625,70 @@
       throw new Error(`${errorMsg} ${errBody}`);
     }
     const data = await response.json();
-    // Expected backend structure: { status, id, matchDetails, results, players }
     if (!data.results || !data.players) {
       throw new Error('Invalid API response structure');
     }
     return data;
   }
 
-  // Render "Results will be available after match completion" UI when status != completed
+  // Pending results UI when match not completed
   function renderPendingResults() {
     const leaderboardContainer = document.getElementById('leaderboard-rows');
     const notesContainer = document.getElementById('matchNotesContainer');
-    notesContainer.style.display = 'none';
-    leaderboardContainer.innerHTML = `
-      <div class="empty-state" style="padding: 70px 20px;">
-        <i class="fa-regular fa-clock fa-3x"></i>
-        <h3>Results will be available after match completion</h3>
-        <p>Check back once the match status changes to "completed".</p>
-        <button onclick="goBack()" class="mt-4 px-5 py-2 bg-indigo-600 rounded-xl text-sm font-semibold hover:bg-indigo-500 transition" style="background:#3f3ef2; border:none;">← Back to Tournaments</button>
-      </div>`;
+    if (notesContainer) notesContainer.style.display = 'none';
+    if (leaderboardContainer) {
+      leaderboardContainer.innerHTML = `
+        <div class="empty-state" style="padding: 70px 20px;">
+          <i class="fa-regular fa-clock fa-3x"></i>
+          <h3>Results will be available after match completion</h3>
+          <p>Check back once the match status changes to "completed".</p>
+          <button onclick="goBack()" class="mt-4 px-5 py-2 bg-indigo-600 rounded-xl text-sm font-semibold hover:bg-indigo-500 transition" style="background:#3f3ef2; border:none;">← Back to Tournaments</button>
+        </div>`;
+    }
   }
 
-  // Show error state (network / 404 / etc)
+  // Show error state
   function showErrorState(container, message, isCritical = true) {
+    const safeMsg = escapeHtml(safeString(message, 'Unknown error.'));
     container.innerHTML = `
       <div class="error-state">
         <i class="fa-solid fa-exclamation-triangle"></i>
         <h3>Error Loading Results</h3>
-        <p>${escapeHtml(message)}</p>
+        <p>${safeMsg}</p>
         <button onclick="window.location.reload()" class="mt-4 px-4 py-2 bg-gray-700 rounded-lg text-sm">Retry</button>
       </div>`;
   }
 
-  // Main flow: auth -> validate status -> call backend -> build leaderboard -> show notes
+  // Main flow: authentication and data loading
   async function loadMatchResultsFlow() {
     const leaderboardContainer = document.getElementById('leaderboard-rows');
     const notesContainer = document.getElementById('matchNotesContainer');
     const notesTextElem = document.getElementById('matchNotes');
     
-    // Validate matchId
-    if (!matchId) {
-      leaderboardContainer.innerHTML = `
-        <div class="error-state">
-          <i class="fa-solid fa-link-slash"></i>
-          <h3>Match ID Missing</h3>
-          <p>Invalid URL. No match ID provided.</p>
-        </div>`;
+    const safeMatchId = safeString(matchId, '');
+    if (!safeMatchId) {
+      if (leaderboardContainer) {
+        leaderboardContainer.innerHTML = `
+          <div class="error-state">
+            <i class="fa-solid fa-link-slash"></i>
+            <h3>Match ID Missing</h3>
+            <p>Invalid URL. No match ID provided.</p>
+          </div>`;
+      }
       return;
     }
 
-    // STATUS CHECK from URL (mandatory)
-    if (statusParam !== 'completed') {
+    const safeStatus = safeString(statusParam, '');
+    if (safeStatus !== 'completed') {
       renderPendingResults();
       return;
     }
 
-    // Show loading in leaderboard
-    leaderboardContainer.innerHTML = '<div class="loading-spinner"><div class="spinner"></div></div>';
-    notesContainer.style.display = 'none';
+    if (leaderboardContainer) {
+      leaderboardContainer.innerHTML = '<div class="loading-spinner"><div class="spinner"></div></div>';
+    }
+    if (notesContainer) notesContainer.style.display = 'none';
 
-    // Wait for auth user to get token
     auth.onAuthStateChanged(async (user) => {
       if (!user) {
         window.location.href = 'home.html';
@@ -642,37 +696,41 @@
       }
       try {
         const token = await user.getIdToken(true);
-        const apiResponse = await fetchMatchResults(token, matchId, statusParam);
+        const apiResponse = await fetchMatchResults(token, safeMatchId, safeStatus);
         
-        // Extract match notes from results
-        const matchNotesText = apiResponse.results?.matchNotes;
-        if (matchNotesText && typeof matchNotesText === 'string' && matchNotesText.trim() !== '') {
-          notesContainer.style.display = 'block';
-          notesTextElem.innerHTML = escapeHtml(matchNotesText);
+        // Extract match notes with safety
+        const matchNotesRaw = apiResponse.results?.matchNotes;
+        const matchNotesText = safeString(matchNotesRaw, '');
+        if (matchNotesText && matchNotesText.trim() !== '') {
+          if (notesContainer) notesContainer.style.display = 'block';
+          if (notesTextElem) notesTextElem.innerHTML = escapeHtml(matchNotesText);
         } else {
-          notesContainer.style.display = 'none';
+          if (notesContainer) notesContainer.style.display = 'none';
         }
         
-        // Build leaderboard array from placements/kills/totalWinnings + players object
         const leaderboardEntries = buildLeaderboardFromApi(apiResponse);
-        renderLeaderboard(leaderboardEntries, leaderboardContainer);
+        if (leaderboardContainer) renderLeaderboard(leaderboardEntries, leaderboardContainer);
       } catch (err) {
         console.error('[MatchResults] Error:', err);
-        let friendlyMsg = err.message || 'Failed to load match results.';
+        let friendlyMsg = safeString(err.message, 'Failed to load match results.');
         if (friendlyMsg.includes('STATUS_NOT_COMPLETED')) {
           renderPendingResults();
           return;
         }
         if (friendlyMsg.includes('404')) friendlyMsg = 'Match not found or results not published.';
         if (friendlyMsg.includes('NetworkError') || friendlyMsg.includes('fetch')) friendlyMsg = 'Network error. Please check your connection.';
-        showErrorState(leaderboardContainer, friendlyMsg);
-        notesContainer.style.display = 'none';
+        if (leaderboardContainer) showErrorState(leaderboardContainer, friendlyMsg);
+        if (notesContainer) notesContainer.style.display = 'none';
       }
     });
   }
 
-  // Start the page
-  loadMatchResultsFlow();
+  // Start the page after ensuring everything is defined
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadMatchResultsFlow);
+  } else {
+    loadMatchResultsFlow();
+  }
 </script>
 </body>
 </html>
