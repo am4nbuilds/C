@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Match Details · ElitePros</title>
+    
+    <!-- Preconnect to backend -->
+    <link rel="preconnect" href="https://elitepros-backend.onrender.com">
+    
+    <!-- Firebase Auth only (no database) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    
+    <!-- Tailwind + Font Awesome -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0b1020;
+            color: #fff;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+
+        /* Topbar – matches tournaments page style */
+        .topbar {
+            background: #111827;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .back-btn {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.05);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .header-center {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+        }
+
+        .header-title-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            background: #1f2340;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .page-title {
+            font-weight: 700;
+            font-size: 18px;
+            background: linear-gradient(135deg, #fff, #a5b4fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .match-id-text {
+            font-size: 11px;
+            color: #9aa3b2;
+            background: rgba(255,255,255,0.05);
+            padding: 2px 8px;
+            border-radius: 12px;
+            margin-top: 2px;
+        }
+
+        .participants-btn {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.05);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .participants-btn:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        /* Banner */
+        .banner-container {
+            margin: 12px 16px;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 2px solid rgba(63,62,242,0.5);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.5);
+        }
+
+        .banner-container img {
+            width: 100%;
+            aspect-ratio: 16/9;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* Tab bar */
+        .tab-bar {
+            display: flex;
+            gap: 8px;
+            margin: 12px 16px;
+            background: #1f2340;
+            border-radius: 14px;
+            padding: 4px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            text-align: center;
+            padding: 10px 0;
+            font-weight: 700;
+            font-size: 13px;
+            color: #9aa3b2;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: all 0.2s;
+            letter-spacing: 0.5px;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #3f3ef2, #6366f1);
+            color: white;
+            box-shadow: 0 4px 12px rgba(63,62,242,0.3);
+        }
+
+        /* Content cards */
+        .content-section {
+            padding: 0 16px 24px;
+        }
+
+        .card {
+            background: linear-gradient(135deg, #1f2340, #121322);
+            border-radius: 20px;
+            padding: 18px 16px;
+            margin: 16px 0;
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+        .card-header {
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+            font-size: 16px;
+            color: white;
+            border-left: 3px solid #3f3ef2;
+            padding-left: 12px;
+        }
+
+        /* Stats grid */
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .stat {
+            text-align: center;
+            background: rgba(255,255,255,0.03);
+            padding: 10px 6px;
+            border-radius: 14px;
+        }
+
+        .stat .label {
+            font-size: 11px;
+            color: #9aa3b2;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .stat .val {
+            font-weight: 800;
+            font-size: 15px;
+            margin-top: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .small-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .small-grid > div {
+            text-align: center;
+            background: rgba(255,255,255,0.02);
+            padding: 8px;
+            border-radius: 12px;
+        }
+
+        .slabel {
+            font-size: 10px;
+            color: #9aa3b2;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .sval {
+            font-weight: 700;
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-size: 13px;
+        }
+
+        /* Enhanced prize & rules list */
+        .prize-list-enhanced, .rules-list-enhanced, .details-list-enhanced {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .prize-item-enhanced, .rules-item-enhanced, .details-item-enhanced {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            padding: 12px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            transition: all 0.2s;
+        }
+
+        .prize-icon, .rules-icon, .details-icon {
+            font-size: 16px;
+            width: 28px;
+            text-align: center;
+            margin-top: 2px;
+        }
+
+        .prize-text, .rules-text, .details-text {
+            color: #e2e8f0;
+            font-size: 14px;
+            line-height: 1.45;
+            font-weight: 500;
+        }
+
+        /* Room credentials card */
+        .credential-container {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .credential-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: linear-gradient(135deg, rgba(63,62,242,0.1), rgba(99,102,241,0.05));
+            border-radius: 14px;
+            padding: 14px 16px;
+            border: 1px solid rgba(99,102,241,0.3);
+        }
+
+        .credential-info {
+            flex: 1;
+        }
+
+        .credential-label {
+            font-size: 11px;
+            color: #cbd5e1;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .credential-value {
+            font-size: 16px;
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+            background: rgba(0,0,0,0.4);
+            padding: 6px 12px;
+            border-radius: 10px;
+            display: inline-block;
+            letter-spacing: 1px;
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+
+        .copy-btn {
+            background: linear-gradient(135deg, #3f3ef2, #6366f1);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover {
+            transform: translateY(-2px);
+            background: linear-gradient(135deg, #6366f1, #818cf8);
+        }
+
+        .copy-btn.copied {
+            background: #10b981;
+        }
+
+        .get-room-btn {
+            background: linear-gradient(135deg, #10b981, #059669);
+            border: none;
+            padding: 12px 20px;
+            border-radius: 12px;
+            color: white;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            transition: all 0.2s;
+            margin-top: 8px;
+        }
+
+        .get-room-btn:hover {
+            transform: translateY(-2px);
+            background: linear-gradient(135deg, #059669, #047857);
+        }
+
+        .get-room-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .live-badge {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 800;
+            margin-left: 12px;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.5); }
+            70% { box-shadow: 0 0 0 6px rgba(239,68,68,0); }
+            100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
+        }
+
+        /* Participants table */
+        .participants-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .participants-table th, .participants-table td {
+            padding: 12px 8px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            text-align: left;
+            font-size: 13px;
+        }
+
+        .pos-tag {
+            font-weight: 800;
+            color: #f97316;
+        }
+
+        .participant-ign {
+            background: rgba(255,255,255,0.08);
+            padding: 4px 12px;
+            border-radius: 20px;
+            display: inline-block;
+            font-weight: 600;
+        }
+
+        /* loading spinner */
+        .spinner-center {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 300px;
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid rgba(255,255,255,0.1);
+            border-top: 4px solid #3f3ef2;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .empty-message {
+            text-align: center;
+            padding: 40px;
+            color: #9aa3b2;
+        }
+
+        .error-message {
+            text-align: center;
+            padding: 20px;
+            color: #ef4444;
+            background: rgba(239,68,68,0.1);
+            border-radius: 12px;
+            margin-top: 12px;
+        }
+
+        /* Loading spinner for button */
+        .btn-loading {
+            position: relative;
+            pointer-events: none;
+        }
+
+        .btn-loading::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            top: 50%;
+            left: 50%;
+            margin-left: -8px;
+            margin-top: -8px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+
+        .btn-loading span {
+            visibility: hidden;
+        }
+    </style>
+</head>
+<body>
+
+<div class="topbar">
+    <button class="back-btn" id="backBtn"><i class="fa fa-arrow-left text-white"></i></button>
+    <div class="header-center">
+        <div class="header-title-row">
+            <img src="/logo.png" alt="logo" class="logo-icon" onerror="this.src='https://via.placeholder.com/32?text=EP';">
+            <div class="page-title">Match Details</div>
+        </div>
+        <div class="match-id-text" id="matchIdDisplay">ID: --</div>
+    </div>
+    <button class="participants-btn" id="participantsIconBtn">
+        <i class="fa-solid fa-users text-green-400 text-xl"></i>
+    </button>
+</div>
+
+<div id="mainContainer" class="spinner-center">
+    <div class="spinner"></div>
+</div>
+
+<template id="mainTemplate">
+    <div>
+        <div class="banner-container">
+            <img id="matchBanner" alt="match banner" src="">
+        </div>
+
+        <div class="tab-bar">
+            <button class="tab-btn active" id="tabDetailsBtn">Match Details</button>
+            <button class="tab-btn" id="tabRulesBtn">Rules</button>
+            <button class="tab-btn" id="tabParticipantsBtn">Participants</button>
+        </div>
+
+        <div class="content-section">
+            <!-- DETAILS TAB -->
+            <div id="detailsTab">
+                <div class="card">
+                    <div class="card-header"><i class="fa-solid fa-info-circle text-blue-400"></i> Match Info</div>
+                    <div class="stat-grid">
+                        <div class="stat"><div class="label">Prize Pool</div><div class="val"><i class="fa-solid fa-trophy text-yellow-400"></i> <span id="prizePoolVal">₹0</span></div></div>
+                        <div class="stat"><div class="label">Per Kill</div><div class="val"><i class="fa-solid fa-skull text-red-400"></i> <span id="perKillVal">₹0</span></div></div>
+                        <div class="stat"><div class="label">Entry Fee</div><div class="val"><i class="fa-solid fa-coins text-yellow-400"></i> <span id="entryFeeVal">₹0</span></div></div>
+                    </div>
+                    <div class="small-grid">
+                        <div><div class="slabel">TYPE</div><div class="sval" id="typeIconArea"><i class="fa-solid fa-user"></i> <span id="matchTypeVal">SOLO</span></div></div>
+                        <div><div class="slabel">PLATFORM</div><div class="sval"><i class="fa-solid fa-mobile-screen-button"></i> <span id="platformVal">Phone</span></div></div>
+                        <div><div class="slabel">MAP</div><div class="sval"><i class="fa-solid fa-map"></i> <span id="mapVal">N/A</span></div></div>
+                    </div>
+                </div>
+
+                <!-- ROOM CREDENTIALS (requires button click) -->
+                <div class="card" id="roomCredentialsCard">
+                    <div class="card-header"><i class="fa-solid fa-key text-green-400"></i> Room Credentials <span id="roomStatusBadge" class="live-badge" style="display: none;">LIVE</span></div>
+                    <div id="roomCredentialsContent">
+                        <button class="get-room-btn" id="getRoomDetailsBtn">
+                            <i class="fa-solid fa-door-open"></i>
+                            <span>Get Room Details</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Prize Distribution -->
+                <div class="card">
+                    <div class="card-header"><i class="fa-solid fa-gift text-pink-400"></i> Prize Distribution</div>
+                    <div id="prizeDistributionContainer"></div>
+                </div>
+
+                <!-- Match Settings -->
+                <div class="card">
+                    <div class="card-header"><i class="fa-solid fa-cog text-orange-400"></i> Match Settings</div>
+                    <div id="matchSettingsContainer"></div>
+                </div>
+            </div>
+
+            <!-- RULES TAB -->
+            <div id="rulesTab" style="display: none;">
+                <div class="card">
+                    <div class="card-header"><i class="fa-solid fa-list-check text-orange-400"></i> Official Rules</div>
+                    <div id="rulesContainer"></div>
+                </div>
+            </div>
+
+            <!-- PARTICIPANTS TAB -->
+            <div id="participantsTab" style="display: none;">
+                <div class="card">
+                    <div class="card-header"><i class="fa-solid fa-users text-green-400"></i> Participants (<span id="participantCount">0</span>)</div>
+                    <div style="overflow-x: auto;">
+                        <table class="participants-table">
+                            <thead>
+                                <tr><th>#</th><th>IGN (In-Game Name)</th><th>Profile</th></tr>
+                            </thead>
+                            <tbody id="participantsTableBody">
+                                <tr><td colspan="3" style="text-align:center;">Loading...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+<script>
+    // ----------------------------- FIREBASE (AUTH ONLY) ---------------------------------
+    const firebaseConfig = {
+        apiKey: "AIzaSyC86fii3isDnSOof71h_18PdZehzCEFIFw",
+        authDomain: "eliteprosofficial.firebaseapp.com",
+        databaseURL: "https://eliteprosofficial-default-rtdb.firebaseio.com",
+        projectId: "eliteprosofficial",
+        storageBucket: "eliteprosofficial.firebasestorage.app",
+        messagingSenderId: "646561207100",
+        appId: "1:646561207100:web:47de7b648695367e208439"
+    };
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    
+    const BACKEND_URL = "https://elitepros-backend.onrender.com";
+    let currentMatchData = null;
+    let currentMatchId = null;
+    let currentStatus = null;
+    let currentUserToken = null;     // Store token after auth to avoid race conditions
+    let isLoadingRoom = false;
+    
+    // Helper: render bullet list for match settings
+    function renderBulletList(containerId, lines, icon = "fa-circle", iconColor = "#3f3ef2") {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        if (!lines || lines.trim() === "") {
+            container.innerHTML = '<div class="empty-message" style="padding:20px;">No details provided.</div>';
+            return;
+        }
+        const items = lines.split("\n").filter(l => l.trim().length > 0);
+        if (items.length === 0) {
+            container.innerHTML = '<div class="empty-message">Not available.</div>';
+            return;
+        }
+        let html = '<div class="details-list-enhanced">';
+        items.forEach(line => {
+            html += `
+                <div class="details-item-enhanced">
+                    <div class="details-icon" style="color:${iconColor};"><i class="fas ${icon}"></i></div>
+                    <div class="details-text">${escapeHtml(line.trim())}</div>
+                </div>
+            `;
+        });
+        html += '</div>';
+        container.innerHTML = html;
+    }
+    
+    function renderPrizeDistribution(containerId, text) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        if (!text || text.trim() === "") {
+            container.innerHTML = '<div class="empty-message">Prize distribution not specified.</div>';
+            return;
+        }
+        const lines = text.split("\n").filter(l => l.trim().length > 0);
+        let html = '<div class="prize-list-enhanced">';
+        lines.forEach((line, idx) => {
+            let icon = "fa-trophy";
+            let color = "#f59e0b";
+            if (idx === 0) { icon = "fa-crown"; color = "#fbbf24"; }
+            else if (idx === 1) { icon = "fa-medal"; color = "#cbd5e1"; }
+            else if (idx === 2) { icon = "fa-award"; color = "#d97706"; }
+            html += `
+                <div class="prize-item-enhanced">
+                    <div class="prize-icon" style="color:${color};"><i class="fas ${icon}"></i></div>
+                    <div class="prize-text">${escapeHtml(line.trim())}</div>
+                </div>
+            `;
+        });
+        html += '</div>';
+        container.innerHTML = html;
+    }
+    
+    function renderRulesWithIcons(containerId, rulesText) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        if (!rulesText || rulesText.trim() === "") {
+            container.innerHTML = '<div class="empty-message">No official rules added.</div>';
+            return;
+        }
+        const lines = rulesText.split("\n").filter(l => l.trim().length > 0);
+        const icons = ['fa-ban','fa-user-slash','fa-shield-halved','fa-clock','fa-network-wired','fa-triangle-exclamation','fa-people-arrows','fa-mobile-screen','fa-wifi','fa-flag'];
+        let html = '<div class="rules-list-enhanced">';
+        lines.forEach((line, i) => {
+            const iconClass = icons[i % icons.length];
+            html += `
+                <div class="rules-item-enhanced">
+                    <div class="rules-icon" style="color:#a5b4fc;"><i class="fas ${iconClass}"></i></div>
+                    <div class="rules-text">${escapeHtml(line.trim())}</div>
+                </div>
+            `;
+        });
+        html += '</div>';
+        container.innerHTML = html;
+    }
+    
+    function escapeHtml(str) { 
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m){ 
+            if(m==='&') return '&amp;'; 
+            if(m==='<') return '&lt;'; 
+            if(m==='>') return '&gt;'; 
+            return m;
+        }); 
+    }
+    
+    function copyToClipboard(text, btnElement) {
+        if (!text) return;
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(text).then(() => {
+                const original = btnElement.innerHTML;
+                btnElement.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
+                btnElement.classList.add('copied');
+                setTimeout(() => { btnElement.innerHTML = original; btnElement.classList.remove('copied'); }, 1500);
+            }).catch(() => fallbackCopy(text, btnElement));
+        } else { fallbackCopy(text, btnElement); }
+    }
+    
+    function fallbackCopy(text, btn) {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed'; ta.style.left = '-9999px';
+        document.body.appendChild(ta);
+        ta.select();
+        const success = document.execCommand('copy');
+        document.body.removeChild(ta);
+        if (success) {
+            const orig = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
+            btn.classList.add('copied');
+            setTimeout(() => { btn.innerHTML = orig; btn.classList.remove('copied'); }, 1500);
+        } else { alert("Copy manually: " + text); }
+    }
+    
+    // Fetch room credentials using stored token (ensures no race)
+    async function fetchRoomCredentials() {
+        if (!currentUserToken) {
+            const credContent = document.getElementById('roomCredentialsContent');
+            if (credContent) credContent.innerHTML = `<div class="error-message"><i class="fa-solid fa-lock"></i> Authentication not ready. Please try again.</div>`;
+            return;
+        }
+        
+        const button = document.getElementById('getRoomDetailsBtn');
+        const credentialsContent = document.getElementById('roomCredentialsContent');
+        if (!button) return;
+        if (isLoadingRoom) return;
+        isLoadingRoom = true;
+        
+        // Disable button and show loading
+        button.disabled = true;
+        button.classList.add('btn-loading');
+        
+        try {
+            const response = await fetch(`${BACKEND_URL}/room-credentials?matchId=${encodeURIComponent(currentMatchId)}&status=${encodeURIComponent(currentStatus)}`, {
+                headers: { 'Authorization': `Bearer ${currentUserToken}` }
+            });
+            
+            if (response.status === 401) { 
+                window.location.href = 'login.html'; 
+                return;
+            }
+            
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || `Failed to fetch room credentials (${response.status})`);
+            }
+            
+            const data = await response.json();
+            
+            // Success - display room credentials
+            if (data.roomId && data.password) {
+                credentialsContent.innerHTML = `
+                    <div class="credential-container">
+                        <div class="credential-item">
+                            <div class="credential-info">
+                                <div class="credential-label">Room ID</div>
+                                <div class="credential-value" id="roomIdValue">${escapeHtml(data.roomId)}</div>
+                            </div>
+                            <button class="copy-btn" id="copyRoomIdBtn"><i class="fa-regular fa-copy"></i> Copy</button>
+                        </div>
+                        <div class="credential-item">
+                            <div class="credential-info">
+                                <div class="credential-label">Password</div>
+                                <div class="credential-value" id="roomPassValue">${escapeHtml(data.password)}</div>
+                            </div>
+                            <button class="copy-btn" id="copyRoomPassBtn"><i class="fa-regular fa-copy"></i> Copy</button>
+                        </div>
+                    </div>
+                `;
+                
+                // Show live badge
+                const badge = document.getElementById('roomStatusBadge');
+                if (badge) badge.style.display = 'inline-block';
+                
+                // Attach copy handlers
+                const copyIdBtn = document.getElementById('copyRoomIdBtn');
+                const copyPassBtn = document.getElementById('copyRoomPassBtn');
+                if (copyIdBtn) copyIdBtn.onclick = () => copyToClipboard(data.roomId, copyIdBtn);
+                if (copyPassBtn) copyPassBtn.onclick = () => copyToClipboard(data.password, copyPassBtn);
+            } else {
+                throw new Error("Invalid room credentials data");
+            }
+            
+        } catch (err) {
+            console.error('Error fetching room credentials:', err);
+            credentialsContent.innerHTML = `
+                <div class="error-message">
+                    <i class="fa-solid fa-exclamation-triangle"></i> 
+                    ${escapeHtml(err.message)}
+                </div>
+                <button class="get-room-btn" id="getRoomDetailsBtn" style="margin-top: 12px;">
+                    <i class="fa-solid fa-rotate-right"></i>
+                    <span>Try Again</span>
+                </button>
+            `;
+            // Re-attach event listener
+            const newButton = document.getElementById('getRoomDetailsBtn');
+            if (newButton) {
+                newButton.addEventListener('click', fetchRoomCredentials);
+            }
+        } finally {
+            isLoadingRoom = false;
+            const btn = document.getElementById('getRoomDetailsBtn');
+            if (btn && btn !== button) {
+                btn.disabled = false;
+                btn.classList.remove('btn-loading');
+            } else if (button) {
+                button.disabled = false;
+                button.classList.remove('btn-loading');
+            }
+        }
+    }
+    
+    function renderMatchUI(data) {
+        const template = document.getElementById('mainTemplate');
+        const clone = template.content.cloneNode(true);
+        const mainDiv = document.getElementById('mainContainer');
+        mainDiv.innerHTML = '';
+        mainDiv.appendChild(clone);
+        
+        // All match fields are inside matchDetails object
+        const matchDetails = data.matchDetails || {};
+        
+        // Header
+        const matchIdDisplay = matchDetails.matchId || data.id || currentMatchId || 'N/A';
+        document.getElementById('matchIdDisplay').innerText = `ID: ${matchIdDisplay}`;
+        document.title = `${matchIdDisplay} - Match Details`;
+        
+        // Banner
+        const bannerImg = document.getElementById('matchBanner');
+        bannerImg.src = matchDetails.banner || 'https://via.placeholder.com/600x338?text=Match+Banner';
+        bannerImg.onerror = () => { bannerImg.src = 'https://via.placeholder.com/600x338?text=Match+Banner'; };
+        
+        // Stats from matchDetails
+        document.getElementById('prizePoolVal').innerHTML = `₹${(matchDetails.prizePool || 0).toLocaleString()}`;
+        document.getElementById('perKillVal').innerHTML = `₹${(matchDetails.perKill || 0)}`;
+        document.getElementById('entryFeeVal').innerHTML = `₹${(matchDetails.entryFee || 0)}`;
+        
+        const matchType = (matchDetails.type || 'solo').toUpperCase();
+        document.getElementById('matchTypeVal').innerText = matchType;
+        let typeIconHtml = '<i class="fa-solid fa-user"></i>';
+        if (matchType === 'DUO') typeIconHtml = '<i class="fa-solid fa-user-group"></i>';
+        if (matchType === 'SQUAD') typeIconHtml = '<i class="fa-solid fa-people-group"></i>';
+        document.getElementById('typeIconArea').innerHTML = `${typeIconHtml} <span>${matchType}</span>`;
+        
+        document.getElementById('platformVal').innerText = matchDetails.platform || 'Phone';
+        document.getElementById('mapVal').innerText = matchDetails.map || 'N/A';
+        
+        // Prize distribution from matchDetails
+        renderPrizeDistribution('prizeDistributionContainer', matchDetails.prizeDistribution || '');
+        renderBulletList('matchSettingsContainer', matchDetails.matchSettings || '', 'fa-cog', '#f97316');
+        renderRulesWithIcons('rulesContainer', matchDetails.rules || '');
+        
+        // Show live badge if match is ongoing
+        if (currentStatus === 'ongoing') {
+            const badge = document.getElementById('roomStatusBadge');
+            if (badge) badge.style.display = 'inline-block';
+        }
+        
+        // Attach Get Room Details button event
+        const getRoomBtn = document.getElementById('getRoomDetailsBtn');
+        if (getRoomBtn) {
+            getRoomBtn.addEventListener('click', fetchRoomCredentials);
+        }
+        
+        // Participants rendering
+        const tbody = document.getElementById('participantsTableBody');
+        const participantCountSpan = document.getElementById('participantCount');
+        const participants = data.participants || [];
+        participantCountSpan.innerText = participants.length;
+        
+        if (participants.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">No participants yet.</td></tr>';
+        } else {
+            tbody.innerHTML = '';
+            participants.forEach((p, idx) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><span class="pos-tag">#${idx+1}</span></td>
+                    <td><span class="participant-ign">${escapeHtml(p.ign || 'Unknown')}</span></td>
+                    <td><a href="view-profile.html?uid=${p.uid}" class="text-blue-400 hover:text-blue-300"><i class="fa-solid fa-eye"></i> View</a></td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+        
+        currentMatchData = data;
+    }
+    
+    async function loadMatchDetails(token) {
+        if (!token) return;
+        if (!currentMatchId || !currentStatus) {
+            document.getElementById('mainContainer').innerHTML = '<div class="empty-message">❌ Missing matchId or status in URL.</div>';
+            return;
+        }
+        
+        try {
+            const response = await fetch(`${BACKEND_URL}/match-details?matchId=${encodeURIComponent(currentMatchId)}&status=${encodeURIComponent(currentStatus)}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            
+            if (response.status === 401) { 
+                window.location.href = 'login.html'; 
+                return;
+            }
+            
+            if (!response.ok) {
+                const errText = await response.text();
+                throw new Error(`API error ${response.status}: ${errText}`);
+            }
+            const data = await response.json();
+            renderMatchUI(data);
+        } catch (err) {
+            console.error(err);
+            document.getElementById('mainContainer').innerHTML = `<div class="empty-message">⚠️ Failed to load match: ${escapeHtml(err.message)}</div>`;
+        }
+    }
+    
+    // Tab switching
+    function switchTab(tab) {
+        const detailsDiv = document.getElementById('detailsTab');
+        const rulesDiv = document.getElementById('rulesTab');
+        const participantsDiv = document.getElementById('participantsTab');
+        const detailsBtn = document.getElementById('tabDetailsBtn');
+        const rulesBtn = document.getElementById('tabRulesBtn');
+        const participantsBtn = document.getElementById('tabParticipantsBtn');
+        
+        if (!detailsDiv || !rulesDiv || !participantsDiv) return;
+        
+        detailsDiv.style.display = 'none';
+        rulesDiv.style.display = 'none';
+        participantsDiv.style.display = 'none';
+        if (detailsBtn) detailsBtn.classList.remove('active');
+        if (rulesBtn) rulesBtn.classList.remove('active');
+        if (participantsBtn) participantsBtn.classList.remove('active');
+        
+        if (tab === 'details') { detailsDiv.style.display = 'block'; if(detailsBtn) detailsBtn.classList.add('active'); }
+        else if (tab === 'rules') { rulesDiv.style.display = 'block'; if(rulesBtn) rulesBtn.classList.add('active'); }
+        else if (tab === 'participants') { participantsDiv.style.display = 'block'; if(participantsBtn) participantsBtn.classList.add('active'); }
+    }
+    
+    // Event listeners (delegated to document)
+    document.addEventListener('click', (e) => {
+        if (e.target.closest('#tabDetailsBtn')) switchTab('details');
+        else if (e.target.closest('#tabRulesBtn')) switchTab('rules');
+        else if (e.target.closest('#tabParticipantsBtn')) switchTab('participants');
+        else if (e.target.closest('#participantsIconBtn')) switchTab('participants');
+    });
+    
+    document.getElementById('backBtn')?.addEventListener('click', () => {
+        if (document.referrer && new URL(document.referrer).hostname === window.location.hostname) window.history.back();
+        else window.location.href = 'tournaments.html';
+    });
+    
+    // Get URL params on load
+    const urlParams = new URLSearchParams(window.location.search);
+    currentMatchId = urlParams.get('matchId');
+    currentStatus = urlParams.get('status');
+    
+    if (!currentMatchId || !currentStatus) {
+        document.getElementById('mainContainer').innerHTML = '<div class="empty-message">❌ Invalid URL: matchId and status required.</div>';
+    }
+    
+    // Firebase auth: wait for user and get token, then load match details
+    auth.onAuthStateChanged(async (user) => {
+        if (user) {
+            try {
+                const token = await user.getIdToken();
+                currentUserToken = token;
+                await loadMatchDetails(token);
+            } catch (err) {
+                console.error("Token error:", err);
+                document.getElementById('mainContainer').innerHTML = '<div class="empty-message">Authentication error. Please login again.</div>';
+            }
+        } else {
+            window.location.href = 'login.html';
+        }
+    });
+</script>
+</body>
+</html>
