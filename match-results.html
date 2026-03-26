@@ -292,30 +292,7 @@
     .match-id-badge { font-size: 10px; padding: 3px 8px; }
   }
   .glow-effect {
-    position: relative;
-  }
-  .glow-effect::after {
-    content: '';
-    position: absolute;
-    top: -2px;
-    left: -2px;
-    right: -2px;
-    bottom: -2px;
-    background: linear-gradient(45deg, #3f3ef2, #10b981, #f59e0b, #3f3ef2);
-    background-size: 400% 400%;
-    border-radius: 22px;
-    z-index: -1;
-    filter: blur(8px);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    animation: gradientShift 3s ease infinite;
-  }
-  .glow-effect:hover::after { opacity: 0.5; }
-  @keyframes gradientShift {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-  }
+
 </style>
 </head>
 <body>
